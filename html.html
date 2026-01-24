@@ -1,12 +1,624 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>learn-git/title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QPS Timer (MVP)</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #121a2b;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #38bdf8;
+      --danger: #fb7185;
+      --ok: #34d399;
+      --border: rgba(148,163,184,0.18);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% 10%, rgba(56,189,248,0.14), transparent 50%),
+                  radial-gradient(900px 600px at 80% 40%, rgba(52,211,153,0.10), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 18px 14px 40px;
+    }
+    header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .title h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+    }
+    .title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 720px) {
+      .grid { grid-template-columns: 1.05fr 0.95fr; }
+    }
+    .card {
+      background: rgba(18,26,43,0.86);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+    .row {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 540px) {
+      .row.two { grid-template-columns: 1fr 1fr; }
+    }
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    input, select, textarea {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(11,15,25,0.75);
+      color: var(--text);
+      padding: 12px 12px;
+      outline: none;
+      font-size: 14px;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .btns { display: grid; gap: 10px; grid-template-columns: 1fr; }
+    @media (min-width: 540px) { .btns { grid-template-columns: 1fr 1fr; } }
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-weight: 650;
+      color: #06121d;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(56,189,248,0.18);
+    }
+    button.secondary {
+      background: rgba(148,163,184,0.14);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+    button.danger {
+      background: rgba(251,113,133,0.15);
+      border: 1px solid rgba(251,113,133,0.35);
+      color: #ffd9e1;
+      box-shadow: none;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .timer {
+      font-variant-numeric: tabular-nums;
+      font-size: 42px;
+      letter-spacing: 1px;
+      margin: 8px 0 4px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      background: rgba(11,15,25,0.55);
+    }
+    .pill strong { color: var(--text); font-weight: 700; }
+    .bar {
+      margin-top: 12px;
+      background: rgba(148,163,184,0.14);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      height: 12px;
+    }
+    .bar > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(56,189,248,0.95), rgba(52,211,153,0.95));
+      transition: width 240ms ease;
+    }
+    .muted { color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .hint { color: rgba(148,163,184,0.9); font-size: 12px; margin-top: 8px; }
+    .warn { color: #fecaca; font-size: 12px; margin-top: 8px; }
+    .ok { color: #bbf7d0; font-size: 12px; margin-top: 8px; }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(11,15,25,0.55);
+      padding: 10px 12px;
+    }
+    .item .top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .item .name { font-weight: 700; }
+    .item .meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .score {
+      font-weight: 800;
+      color: var(--ok);
+      font-variant-numeric: tabular-nums;
+    }
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+  </style>
 </head>
+
 <body>
-    <h1>yo</h1>
-    <p>hii</p>
-</body>
-</html>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>QPS Timer (MVP)</h1>
+        <p>Quest → Start → Timer → Report → Daily total (localStorage)</p>
+      </div>
+      <div class="pill" id="todayPill"></div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: Timer + Controls -->
+      <section class="card">
+        <div class="row two">
+          <div>
+            <label for="category">Quest Category</label>
+            <select id="category">
+              <option value="Learning">Learning</option>
+              <option value="Work/Project">Work/Project</option>
+              <option value="Physical">Physical</option>
+              <option value="Connection">Connection</option>
+            </select>
+          </div>
+          <div>
+            <label for="questName">Quest Name (optional)</label>
+            <input id="questName" placeholder="e.g., English grammar drill" />
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="pill" id="statePill"></div>
+        <div class="timer" id="timerText">00:00:00</div>
+
+        <div class="btns">
+          <button id="startBtn">Start Quest</button>
+          <button id="stopBtn" class="danger" disabled>Stop</button>
+          <button id="pauseBtn" class="secondary" disabled>Pause</button>
+          <button id="resumeBtn" class="secondary" disabled>Resume</button>
+        </div>
+
+        <div class="hint" id="timerHint"></div>
+        <div class="warn" id="timerWarn" style="display:none;"></div>
+      </section>
+
+      <!-- RIGHT: Daily Total + Today Log -->
+      <section class="card">
+        <div class="pill">
+          <span>Today's Total QPS:</span>
+          <strong id="todayTotal">0.0</strong>
+          <span>/ 100</span>
+        </div>
+        <div class="bar" aria-label="progress toward 100">
+          <div id="progressFill"></div>
+        </div>
+        <div class="muted" style="margin-top:10px;">
+          Base score = minutes × 0.4. Quality bonus = 0 / +2 / +4 / +6 (allowed only when time ≥ 30 minutes).
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="display:flex; gap:10px; align-items:center; justify-content:space-between;">
+          <div class="pill"><span>Today's Reports</span></div>
+          <button id="resetTodayBtn" class="danger" style="padding:10px 12px; font-size:13px;">Reset Today</button>
+        </div>
+
+        <div class="list" id="todayList"></div>
+      </section>
+    </div>
+
+    <!-- REPORT SECTION -->
+    <section class="card" style="margin-top:12px;" id="reportCard">
+      <div class="pill"><span>Report Quest</span></div>
+      <div class="row two" style="margin-top:12px;">
+        <div>
+          <label for="reportMinutes">Minutes Spent</label>
+          <input id="reportMinutes" type="number" min="0" step="1" />
+          <div class="hint" id="bonusRuleHint"></div>
+        </div>
+        <div>
+          <label for="qualityBonus">Quality Bonus</label>
+          <select id="qualityBonus">
+            <option value="0">0</option>
+            <option value="2">+2</option>
+            <option value="4">+4</option>
+            <option value="6">+6</option>
+          </select>
+          <div class="hint" id="capHint"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label for="notes">Notes</label>
+        <textarea id="notes" placeholder="What did you do? Key insight? Did behavior change?"></textarea>
+      </div>
+
+      <div class="btns" style="margin-top:12px;">
+        <button id="submitReportBtn">Submit Report</button>
+        <button id="discardBtn" class="secondary">Discard</button>
+      </div>
+
+      <div class="ok" id="submitOk" style="display:none;"></div>
+      <div class="warn" id="submitWarn" style="display:none;"></div>
+    </section>
+  </div>
+
+  <script>
+    // -------------------------
+    // Helpers: date + formatting
+    // -------------------------
+    function localDateKey(d = new Date()) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return ${y}-${m}-${day};
+    }
+
+    function formatHMS(ms) {
+      const totalSec = Math.max(0, Math.floor(ms / 1000));
+      const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
+      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
+      const s = String(totalSec % 60).padStart(2, "0");
+      return ${h}:${m}:${s};
+    }
+
+    function round1(n) {
+      return Math.round(n * 10) / 10;
+    }
+
+    // -------------------------
+    // Storage keys
+    // -------------------------
+    const KEY_STATE = "qps_timer_state_v1";
+    const KEY_LOG_PREFIX = "qps_log_"; // per-day: qps_log_YYYY-MM-DD
+
+    // -------------------------
+    // Elements
+    // -------------------------
+    const el = {
+      todayPill: document.getElementById("todayPill"),
+      statePill: document.getElementById("statePill"),
+      timerText: document.getElementById("timerText"),
+      timerHint: document.getElementById("timerHint"),
+      timerWarn: document.getElementById("timerWarn"),
+
+      category: document.getElementById("category"),
+      questName: document.getElementById("questName"),
+
+      startBtn: document.getElementById("startBtn"),
+      stopBtn: document.getElementById("stopBtn"),
+      pauseBtn: document.getElementById("pauseBtn"),
+      resumeBtn: document.getElementById("resumeBtn"),
+
+      reportCard: document.getElementById("reportCard"),
+      reportMinutes: document.getElementById("reportMinutes"),
+      qualityBonus: document.getElementById("qualityBonus"),
+      notes: document.getElementById("notes"),
+      bonusRuleHint: document.getElementById("bonusRuleHint"),
+      capHint: document.getElementById("capHint"),
+      submitReportBtn: document.getElementById("submitReportBtn"),
+      discardBtn: document.getElementById("discardBtn"),
+      submitOk: document.getElementById("submitOk"),
+      submitWarn: document.getElementById("submitWarn"),
+
+      todayTotal: document.getElementById("todayTotal"),
+      progressFill: document.getElementById("progressFill"),
+      todayList: document.getElementById("todayList"),
+      resetTodayBtn: document.getElementById("resetTodayBtn"),
+    };
+
+    // -------------------------
+    // App state
+    // status: "idle" | "running" | "paused" | "stopped"
+    // startTs: number (Date.now when last started/resumed)
+    // elapsedBefore: ms accumulated before last start/resume
+    // startDateKey: dateKey of the quest session (for logging)
+    // selectedCategory, questName
+    // lastElapsedMs: ms captured on stop
+    // -------------------------
+    let state = {
+      status: "idle",
+      startTs: null,
+      elapsedBefore: 0,
+      startDateKey: null,
+      selectedCategory: "Learning",
+      questName: "",
+      lastElapsedMs: 0,
+    };
+
+    let tickHandle = null;
+
+    // -------------------------
+    // Log functions
+    // -------------------------
+    function getDayLog(dateKey) {
+      const raw = localStorage.getItem(KEY_LOG_PREFIX + dateKey);
+      try { return raw ? JSON.parse(raw) : []; } catch { return []; }
+    }
+    function setDayLog(dateKey, arr) {
+      localStorage.setItem(KEY_LOG_PREFIX + dateKey, JSON.stringify(arr));
+    }
+    function calcDayTotal(dateKey) {
+      const log = getDayLog(dateKey);
+      const total = log.reduce((sum, x) => sum + (Number(x.questScore) || 0), 0);
+      return round1(total);
+    }
+    function calcCategoryBaseMinutesUsed(dateKey, category) {
+      const log = getDayLog(dateKey);
+      // baseMinutesUsed is what actually counted toward Base score (cap-aware)
+      return log
+        .filter(x => x.category === category)
+        .reduce((sum, x) => sum + (Number(x.baseMinutesUsed) || 0), 0);
+    }
+
+    // -------------------------
+    // Persist / restore
+    // -------------------------
+    function saveState() {
+      localStorage.setItem(KEY_STATE, JSON.stringify(state));
+    }
+    function loadState() {
+      const raw = localStorage.getItem(KEY_STATE);
+      if (!raw) return;
+      try {
+        const s = JSON.parse(raw);
+        if (!s || typeof s !== "object") return;
+        state = { ...state, ...s };
+      } catch {}
+    }
+
+    // -------------------------
+    // UI rendering
+    // -------------------------
+    function setReportVisible(visible) {
+      el.reportCard.style.display = visible ? "block" : "none";
+    }
+
+    function lockQuestInputs(lock) {
+      el.category.disabled = lock;
+      el.questName.disabled = lock;
+      el.startBtn.disabled = lock || state.status !== "idle";
+    }
+
+    function updateStatePill() {
+      let label = "Idle";
+      if (state.status === "running") label = "Running";
+      if (state.status === "paused") label = "Paused";
+      if (state.status === "stopped") label = "Stopped (report pending)";
+      el.statePill.innerHTML = <span>Status:</span> <strong>${label}</strong>;
+    }
+
+    function computeElapsedMs(now = Date.now()) {
+      if (state.status === "running" && state.startTs) {
+        return state.elapsedBefore + (now - state.startTs);
+      }
+      return state.elapsedBefore; // idle/paused/stopped stores current
+    }
+
+    function renderTimer() {
+      const ms = (state.status === "stopped")
+        ? state.lastElapsedMs
+        : computeElapsedMs();
+
+      el.timerText.textContent = formatHMS(ms);
+
+      // Show contextual hint
+      if (state.status === "idle") {
+        el.timerHint.textContent = "Select a quest and press Start.";
+      } else if (state.status === "running") {
+        el.timerHint.textContent = Logging to: ${state.startDateKey} • Category: ${state.selectedCategory};
+      } else if (state.status === "paused") {
+        el.timerHint.textContent = "Paused. Resume or Stop.";
+      } else if (state.status === "stopped") {
+        el.timerHint.textContent = "Stopped. Submit report to record score.";
+      }
+    }
+
+    function renderControls() {
+      el.startBtn.disabled = state.status !== "idle";
+      el.stopBtn.disabled = !(state.status === "running" || state.status === "paused");
+      el.pauseBtn.disabled = state.status !== "running";
+      el.resumeBtn.disabled = state.status !== "paused";
+
+      const lock = (state.status !== "idle"); // lock selection until reported/discarded
+      lockQuestInputs(lock);
+
+      // Sync dropdown/text (only when idle, otherwise keep locked values)
+      if (state.status === "idle") {
+        el.category.value = state.selectedCategory || "Learning";
+        el.questName.value = state.questName || "";
+      }
+    }
+
+    function renderToday() {
+      const todayKey = localDateKey();
+      el.todayPill.innerHTML = <span>Today:</span> <strong>${todayKey}</strong>;
+
+      const total = calcDayTotal(todayKey);
+      el.todayTotal.textContent = total.toFixed(1);
+
+      const pct = Math.max(0, Math.min(100, (total / 100) * 100));
+      el.progressFill.style.width = ${pct}%;
+
+      // List items
+      const log = getDayLog(todayKey).slice().reverse();
+      if (log.length === 0) {
+        el.todayList.innerHTML = <div class="muted">No reports yet.</div>;
+        return;
+      }
+      el.todayList.innerHTML = log.map(item => {
+        const name = item.questName?.trim() ? item.questName.trim() : "(no name)";
+        const mins = Number(item.minutesSpent || 0);
+        const baseMins = Number(item.baseMinutesUsed || 0);
+        const baseScore = Number(item.baseScore || 0);
+        const bonus = Number(item.qualityBonus || 0);
+        const questScore = Number(item.questScore || 0);
+        const capNote = (baseMins < mins)
+          ?  • base cap: counted ${baseMins}/${mins} min
+          : "";
+        return `
+          <div class="item">
+            <div class="top">
+              <div class="name">${escapeHtml(name)}</div>
+              <div class="score">+${round1(questScore).toFixed(1)}</div>
+            </div>
+            <div class="meta">
+              ${escapeHtml(item.category)} • ${mins} min • base ${round1(baseScore).toFixed(1)} + bonus ${bonus}${capNote}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function showWarn(msg) {
+      el.timerWarn.style.display = "block";
+      el.timerWarn.textContent = msg;
+      setTimeout(() => {
+        el.timerWarn.style.display = "none";
+        el.timerWarn.textContent = "";
+      }, 2600);
+    }
+
+    function clearSubmitMessages() {
+      el.submitOk.style.display = "none";
+      el.submitWarn.style.display = "none";
+      el.submitOk.textContent = "";
+      el.submitWarn.textContent = "";
+    }
+
+    // -------------------------
+    // Timer tick
+    // -------------------------
+    function startTick() {
+      if (tickHandle) return;
+      tickHandle = setInterval(() => {
+        // If date changed, keep showing today's panel correctly
+        renderToday();
+
+        // Timer display
+        renderTimer();
+      }, 250);
+    }
+    function stopTick() {
+      if (tickHandle) clearInterval(tickHandle);
+      tickHandle = null;
+    }
+
+    // -------------------------
+    // Actions
+    // -------------------------
+    function startQuest() {
+      const now = Date.now();
+      state.status = "running";
+      state.selectedCategory = el.category.value;
+      state.questName = el.questName.value || "";
+      state.startDateKey = localDateKey(new Date());
+      state.startTs = now;
+      state.elapsedBefore = 0;
+      state.lastElapsedMs = 0;
+      saveState();
+
+      setReportVisible(false);
+      clearSubmitMessages();
+      updateUI();
+      startTick();
+    }
+
+    function pauseQuest() {
+      if (state.status !== "running") return;
+      const now = Date.now();
+      state.elapsedBefore = computeElapsedMs(now);
+      state.startTs = null;
+      state.status = "paused";
+      saveState();
+      updateUI();
+    }
+
+    function resumeQuest() {
+      if (state.status !== "paused") return;
+      state.status = "running";
+      state.startTs = Date.now();
+      saveState();
+      updateUI();
+    }
+
+    function stopQuest() {
+      if (!(state.status === "running" || state.status === "paused")) return;
+      const now = Date.now();
+      const elapsed = (state.status === "running") ? computeElapsedMs(now) : state.elapsedBefore;
+
+      state.status = "stopped";
+      state.startTs = null;
+      state.elapsedBefore = elapsed;       // keep it for restore
+      state.lastElapsedMs = elapsed;       // stable display
+      saveState();
+
+      // Prepare report form
+      const minutes = Math.max(0, Math.round(elapsed / 60000));
+      el.reportMinutes.value = String(minutes);
+
+      // Bonus rule: only >= 30 minutes can choose bonus, else force 0
+      applyBonusRule(minutes);
+
+      // Cap hint (base cap per category per day)
+      const used = calcCategoryBaseMinutesUsed(state.startDateKey, state.selected
