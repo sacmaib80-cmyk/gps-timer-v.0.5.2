@@ -7,8 +7,7 @@
 
   <style>
 /* =========================================================
-  [BOX 0] THEME (แก้สี/ฟอนต์ตรงนี้ที่เดียว)
-  - โทนน่ารักแบบ Duolingo-ish: สว่าง, กลม, นุ่ม
+  [BOX 0] THEME
 ========================================================= */
 :root{
   --bg: #f6f9ff;
@@ -18,9 +17,9 @@
   --ink:#0f172a;
   --muted:#64748b;
 
-  --accent:#22c55e;      /* เขียวหลัก */
-  --accent2:#60a5fa;     /* ฟ้านุ่ม */
-  --warn:#fb7185;        /* ชมพูแดง */
+  --accent:#22c55e;
+  --accent2:#60a5fa;
+  --warn:#fb7185;
   --gold:#f59e0b;
 
   --border: rgba(15,23,42,.10);
@@ -42,11 +41,11 @@ body{
     radial-gradient(1000px 700px at 86% 18%, rgba(34,197,94,.22), transparent 52%),
     radial-gradient(900px 700px at 48% 92%, rgba(245,158,11,.14), transparent 60%),
     linear-gradient(180deg, var(--bg), var(--bg2));
-  overflow:hidden; /* กัน body scroll - ให้เลื่อนใน container */
+  overflow:hidden;
 }
 
 /* =========================================================
-  [BOX 1] APP LAYOUT (Duolingo scroll)
+  [BOX 1] APP LAYOUT
 ========================================================= */
 .app{
   height:100vh;
@@ -69,7 +68,6 @@ body{
   padding: 10px 10px 12px;
   background: linear-gradient(180deg, rgba(246,249,255,.98), rgba(246,249,255,.82), rgba(246,249,255,.00));
   backdrop-filter: blur(10px);
-  p
 }
 .topbarRow{
   display:flex;
@@ -107,9 +105,7 @@ body{
   color:var(--muted);
 }
 .pill b{ color:var(--ink); }
-.streakPill{
-  color: var(--ink);
-}
+.streakPill{ color: var(--ink); }
 .streakPill .fire{
   filter: drop-shadow(0 6px 10px rgba(245,158,11,.22));
 }
@@ -379,9 +375,6 @@ button:disabled{
   <div class="app" id="appScroll">
     <div class="container">
 
-      <!-- ======================================================
-        TOPBAR (sticky)
-      ======================================================= -->
       <div class="topbar">
         <div class="topbarRow">
           <div class="brand">
@@ -402,18 +395,14 @@ button:disabled{
         </div>
       </div>
 
-      <!-- ======================================================
-        SECTION: TIMER
-      ======================================================= -->
+      <!-- TIMER -->
       <div class="section" id="sec-timer">
-        <div class="sectionHead">
-          <h2>Timer</h2>
-        </div>
+        <div class="sectionHead"><h2>Timer</h2></div>
 
         <div class="card">
           <div class="row two">
             <div>
-              <label for="category">Quest Category</label>
+              <label for="category">Quest Category (มีไว้จัดกลุ่มเฉยๆ ไม่ใช้ cap)</label>
               <select id="category">
                 <option value="Learning">Learning</option>
                 <option value="Work/Project">Work/Project</option>
@@ -422,8 +411,8 @@ button:disabled{
               </select>
             </div>
             <div>
-              <label for="questName">Quest Name (optional)</label>
-              <input id="questName" placeholder="เช่น English drill / Web fix" />
+              <label for="questName">Quest Name (ห้ามซ้ำในวันเดียวกัน)</label>
+              <input id="questName" placeholder="เช่น English / Logic / Web fix" />
             </div>
           </div>
 
@@ -442,13 +431,9 @@ button:disabled{
         </div>
       </div>
 
-      <!-- ======================================================
-        SECTION: TODAY
-      ======================================================= -->
+      <!-- TODAY -->
       <div class="section" id="sec-today">
-        <div class="sectionHead">
-          <h2>Today</h2>
-        </div>
+        <div class="sectionHead"><h2>Today</h2></div>
 
         <div class="card">
           <div class="progressWrap">
@@ -464,7 +449,8 @@ button:disabled{
           <div class="bar"><div id="progressFill"></div></div>
 
           <div class="hint" style="margin-top:10px;">
-            Base = minutes × 0.4 • Bonus = 0/+2/+4/+6 (เฉพาะเวลา ≥ 30 นาที) • Base cap/หมวด/วัน = 60 นาที
+            Base = minutes × 0.4 • Bonus = 0/+2/+4/+6 (เฉพาะเวลา ≥ 30 นาที) •
+            <b>Base cap = 60 นาที/วัน/ต่อ Quest Name</b> • Quest Name ห้ามซ้ำวันเดียวกัน
           </div>
 
           <div class="divider"></div>
@@ -483,13 +469,9 @@ button:disabled{
         </div>
       </div>
 
-      <!-- ======================================================
-        SECTION: REPORT (hidden until Stop)
-      ======================================================= -->
+      <!-- REPORT -->
       <div class="section" id="sec-report">
-        <div class="sectionHead">
-          <h2>Report</h2>
-        </div>
+        <div class="sectionHead"><h2>Report</h2></div>
 
         <div class="card" id="reportCard" style="display:none;">
           <div class="badge">Report Quest</div>
@@ -528,16 +510,14 @@ button:disabled{
         </div>
 
         <div class="hint" id="reportHiddenHint">
-          * Report จะโผล่เมื่อกด Stop เท่านั้น (กันข้อมูลมั่ว)
+          * Report จะโผล่เมื่อกด Stop เท่านั้น
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ======================================================
-    HISTORY OVERLAY
-  ======================================================= -->
+  <!-- HISTORY -->
   <div class="overlay" id="overlay">
     <div class="sheet">
       <div class="sheetHead">
@@ -560,7 +540,7 @@ button:disabled{
 
 <script>
 /* =========================================================
-  [BOX A] CONFIG (แก้กติกา/คีย์ storage ตรงนี้ที่เดียว)
+  [BOX A] CONFIG
 ========================================================= */
 const KEY_STATE  = "qps_timer_state_v2";
 const KEY_DATA   = "qpsData_v2";
@@ -569,7 +549,7 @@ const KEY_STREAK = "qps_streak_v1";
 const RULES = {
   basePerMinute: 0.4,
   bonusMinMinutes: 30,     // ต่ำกว่านี้ bonus = 0 ล็อก
-  baseCapPerCategory: 60,  // นาที/หมวด/วัน
+  baseCapPerQuestName: 60, // ✅ นาที/วัน/ต่อ Quest Name (แทนหมวด)
 };
 
 /* =========================================================
@@ -599,9 +579,17 @@ function scrollToId(id){
   if(!el) return;
   el.scrollIntoView({ behavior:"smooth", block:"start" });
 }
+function normalizeQuestName(name){
+  return String(name ?? "").trim().replace(/\s+/g, " ");
+}
+function showInlineWarn(msg){
+  el.timerWarn.style.display="block";
+  el.timerWarn.textContent=msg;
+  setTimeout(()=>{ el.timerWarn.style.display="none"; el.timerWarn.textContent=""; }, 2400);
+}
 
 /* =========================================================
-  [BOX C] DATA LAYER (ก้อนเดียว)
+  [BOX C] DATA LAYER
 ========================================================= */
 function loadAll(){
   try { return JSON.parse(localStorage.getItem(KEY_DATA)) || {}; }
@@ -629,21 +617,31 @@ function calcDayTotal(dateKey){
     : (day.quests||[]).reduce((s,q)=> s + (Number(q.questScore)||0), 0)
   );
 }
-function calcCategoryBaseMinutesUsed(dateKey, category){
-  const data = loadAll();
-  const day = data[dateKey];
-  if(!day || !Array.isArray(day.quests)) return 0;
-  return day.quests
-    .filter(x => x.category === category)
-    .reduce((s,x) => s + (Number(x.baseMinutesUsed)||0), 0);
-}
 function listDays(){
   const data = loadAll();
   return Object.keys(data).sort().reverse();
 }
 
+/* ✅ นาที base ที่ใช้ไปแล้ว “ต่อ Quest Name” ในวันนั้น */
+function calcQuestNameBaseMinutesUsed(dateKey, questNameNormalized){
+  const data = loadAll();
+  const day = data[dateKey];
+  if(!day || !Array.isArray(day.quests)) return 0;
+  return day.quests
+    .filter(x => (x.questKey || "") === questNameNormalized)
+    .reduce((s,x) => s + (Number(x.baseMinutesUsed)||0), 0);
+}
+
+/* ✅ กันชื่อซ้ำ: วันเดียวกันมี questKey นี้อยู่แล้วไหม */
+function isQuestNameDuplicateForDay(dateKey, questNameNormalized){
+  const data = loadAll();
+  const day = data[dateKey];
+  if(!day || !Array.isArray(day.quests)) return false;
+  return day.quests.some(x => (x.questKey || "") === questNameNormalized);
+}
+
 /* =========================================================
-  [BOX D] STREAK (คำนวณจาก log จริง)
+  [BOX D] STREAK (จาก log จริง)
 ========================================================= */
 function loadStreak(){
   const raw = localStorage.getItem(KEY_STREAK);
@@ -693,7 +691,7 @@ function updateStreakAfterChange(){
 }
 
 /* =========================================================
-  [BOX E] ELEMENTS (id ไม่ซ้ำ)
+  [BOX E] ELEMENTS
 ========================================================= */
 const el = {
   todayText: document.getElementById("todayText"),
@@ -751,6 +749,7 @@ let state = {
   startDateKey: null,
   selectedCategory: "Learning",
   questName: "",
+  questKey: "",        // ✅ normalized quest name
   lastElapsedMs: 0,
 };
 let tickHandle = null;
@@ -788,8 +787,8 @@ function renderTimer(){
   const ms = (state.status==="stopped") ? state.lastElapsedMs : computeElapsedMs();
   el.timerText.textContent = formatHMS(ms);
 
-  if(state.status==="idle") el.timerHint.textContent = "เลือกเควสแล้วกด Start";
-  else if(state.status==="running") el.timerHint.textContent = `กำลังจับเวลา • ${state.selectedCategory} • ${state.startDateKey}`;
+  if(state.status==="idle") el.timerHint.textContent = "ใส่ Quest Name แล้วกด Start (ห้ามซ้ำในวันเดียวกัน)";
+  else if(state.status==="running") el.timerHint.textContent = `กำลังจับเวลา • ${state.questKey} • ${state.startDateKey}`;
   else if(state.status==="paused") el.timerHint.textContent = "Paused • Resume หรือ Stop";
   else el.timerHint.textContent = "Stopped • ส่ง Report เพื่อบันทึกคะแนน";
 }
@@ -845,11 +844,6 @@ function renderToday(){
     `;
   }).join("");
 }
-function showWarn(msg){
-  el.timerWarn.style.display="block";
-  el.timerWarn.textContent=msg;
-  setTimeout(()=>{ el.timerWarn.style.display="none"; el.timerWarn.textContent=""; }, 2200);
-}
 function clearSubmitMessages(){
   el.submitOk.style.display="none"; el.submitWarn.style.display="none";
   el.submitOk.textContent=""; el.submitWarn.textContent="";
@@ -874,7 +868,7 @@ function startTick(){
 }
 
 /* =========================================================
-  [BOX I] RULES (bonus lock + cap hint)
+  [BOX I] RULES
 ========================================================= */
 function applyBonusRule(minutes){
   if(minutes < RULES.bonusMinMinutes){
@@ -886,20 +880,36 @@ function applyBonusRule(minutes){
     el.bonusRuleHint.textContent = `Bonus ใช้ได้ (เวลา ≥ ${RULES.bonusMinMinutes} นาที)`;
   }
 }
-function updateCapHint(dateKey, category){
-  const used = calcCategoryBaseMinutesUsed(dateKey, category);
-  const remaining = Math.max(0, RULES.baseCapPerCategory - used);
-  el.capHint.textContent = `Base cap/หมวด/วัน = ${RULES.baseCapPerCategory} นาที • วันนี้ใช้ "${category}" แล้ว ${used} นาที • เหลือ ${remaining} นาที`;
+function updateCapHint(dateKey, questKey){
+  const used = calcQuestNameBaseMinutesUsed(dateKey, questKey);
+  const remaining = Math.max(0, RULES.baseCapPerQuestName - used);
+  el.capHint.textContent =
+    `Base cap/วัน/เควส = ${RULES.baseCapPerQuestName} นาที • วันนี้ "${questKey}" ใช้ไปแล้ว ${used} นาที • เหลือ ${remaining} นาที`;
 }
 
 /* =========================================================
-  [BOX J] ACTIONS (Timer -> Report -> Save)
+  [BOX J] ACTIONS
 ========================================================= */
 function startQuest(){
+  const dateKey = localDateKey();
+  const qn = normalizeQuestName(el.questName.value);
+
+  if(!qn){
+    showInlineWarn("ต้องใส่ Quest Name ก่อนเริ่ม");
+    return;
+  }
+
+  // ✅ กันชื่อซ้ำในวันเดียวกัน
+  if(isQuestNameDuplicateForDay(dateKey, qn)){
+    showInlineWarn(`Quest Name "${qn}" วันนี้มีแล้ว ❌ (ห้ามซ้ำ)`);
+    return;
+  }
+
   state.status="running";
   state.selectedCategory = el.category.value;
   state.questName = el.questName.value || "";
-  state.startDateKey = localDateKey();
+  state.questKey = qn;
+  state.startDateKey = dateKey;
   state.startTs = Date.now();
   state.elapsedBefore = 0;
   state.lastElapsedMs = 0;
@@ -943,13 +953,12 @@ function stopQuest(){
   applyBonusRule(minutes);
 
   const dateKey = state.startDateKey || localDateKey();
-  updateCapHint(dateKey, state.selectedCategory);
+  updateCapHint(dateKey, state.questKey);
 
   setReportVisible(true);
   clearSubmitMessages();
   updateUI();
 
-  // เลื่อนมาที่ report อัตโนมัติ
   scrollToId("sec-report");
 }
 function discardReport(){
@@ -958,6 +967,7 @@ function discardReport(){
   state.elapsedBefore=0;
   state.lastElapsedMs=0;
   state.startDateKey=null;
+  state.questKey="";
   saveState();
 
   setReportVisible(false);
@@ -978,9 +988,17 @@ function submitReport(){
   const bonus = el.qualityBonus.disabled ? 0 : Number(el.qualityBonus.value||0);
 
   const dateKey = state.startDateKey || localDateKey();
+  const questKey = state.questKey || normalizeQuestName(state.questName || "");
 
-  const used = calcCategoryBaseMinutesUsed(dateKey, state.selectedCategory);
-  const remaining = Math.max(0, RULES.baseCapPerCategory - used);
+  if(!questKey){
+    el.submitWarn.style.display="block";
+    el.submitWarn.textContent="Quest Name หาย (ลอง Discard แล้วเริ่มใหม่)";
+    return;
+  }
+
+  // ✅ cap 60 นาทีต่อวัน “ต่อ quest name”
+  const used = calcQuestNameBaseMinutesUsed(dateKey, questKey);
+  const remaining = Math.max(0, RULES.baseCapPerQuestName - used);
   const baseMinutesUsed = Math.min(minutes, remaining);
 
   const baseScore = baseMinutesUsed * RULES.basePerMinute;
@@ -990,7 +1008,8 @@ function submitReport(){
     ts: Date.now(),
     dateKey,
     category: state.selectedCategory,
-    questName: state.questName || "",
+    questName: state.questName || questKey,
+    questKey, // ✅ key สำหรับ cap + uniqueness
     minutesSpent: minutes,
     baseMinutesUsed,
     baseScore: round1(baseScore),
@@ -1005,7 +1024,6 @@ function submitReport(){
   recalcDayTotal(day);
   saveAll(data);
 
-  // ✅ streak update หลังข้อมูลเปลี่ยน
   updateStreakAfterChange();
 
   el.submitOk.style.display="block";
@@ -1030,18 +1048,18 @@ function resetToday(){
 
   updateStreakAfterChange();
   renderToday();
-  showWarn("เคลียร์ข้อมูลวันนี้แล้ว");
+  showInlineWarn("เคลียร์ข้อมูลวันนี้แล้ว");
 }
 
 /* =========================================================
-  [BOX K] HISTORY OVERLAY
+  [BOX K] HISTORY
 ========================================================= */
 let selectedDay = null;
 
 function openHistory(){
   const days = listDays();
   if(days.length===0){
-    showWarn("ยังไม่มีข้อมูลย้อนหลัง");
+    showInlineWarn("ยังไม่มีข้อมูลย้อนหลัง");
     return;
   }
   el.overlay.classList.add("show");
@@ -1085,6 +1103,8 @@ function renderDayView(dayKey){
     <div class="list">
       ${log.map(item=>{
         const name = item.questName?.trim()? item.questName.trim() : "(no name)";
+        const capNote = (Number(item.baseMinutesUsed||0) < Number(item.minutesSpent||0))
+          ? ` • cap: counted ${item.baseMinutesUsed}/${item.minutesSpent} min` : "";
         return `
           <div class="item">
             <div class="itemTop">
@@ -1092,7 +1112,7 @@ function renderDayView(dayKey){
               <div class="itemScore">+${Number(item.questScore||0).toFixed(1)}</div>
             </div>
             <div class="itemMeta">
-              ${escapeHtml(item.category)} • ${item.minutesSpent} min • base ${Number(item.baseScore||0).toFixed(1)} + bonus ${item.qualityBonus||0}
+              ${escapeHtml(item.category)} • ${item.minutesSpent} min • base ${Number(item.baseScore||0).toFixed(1)} + bonus ${item.qualityBonus||0}${capNote}
             </div>
             ${item.notes ? `<div class="itemMeta" style="margin-top:8px;">📝 ${escapeHtml(item.notes)}</div>` : ``}
           </div>
@@ -1103,7 +1123,7 @@ function renderDayView(dayKey){
 }
 
 /* =========================================================
-  [BOX L] EXPORT / IMPORT (เสถียร, ไม่ซ้อน, ไม่หลอน)
+  [BOX L] EXPORT / IMPORT
 ========================================================= */
 function downloadJson(filename, obj){
   const blob = new Blob([JSON.stringify(obj, null, 2)], { type:"application/json" });
@@ -1133,7 +1153,7 @@ function exportData(){
     data: loadAll()
   };
   downloadJson(`qpsData_v2_${localDateKey()}.json`, payload);
-  showWarn("Exported ✅ (ดูไฟล์ใน Downloads)");
+  showInlineWarn("Exported ✅ (ดูไฟล์ใน Downloads)");
 }
 function importDataObject(imported, mode="merge"){
   const raw = imported?.data ?? imported;
@@ -1150,6 +1170,11 @@ function importDataObject(imported, mode="merge"){
       const incomingDay = raw[dayKey];
       const target = ensureDay(cur, dayKey);
       target.quests = target.quests.concat(incomingDay.quests || []);
+      // รองรับไฟล์เก่าที่ไม่มี questKey: เติมให้จาก questName
+      target.quests = target.quests.map(q=>{
+        if(!q.questKey) q.questKey = normalizeQuestName(q.questName || "");
+        return q;
+      });
       recalcDayTotal(target);
     }
     saveAll(cur);
@@ -1164,7 +1189,7 @@ function importDataObject(imported, mode="merge"){
     renderDayView(selectedDay);
   }
 
-  showWarn(`Imported ✅ (${mode.toUpperCase()})`);
+  showInlineWarn(`Imported ✅ (${mode.toUpperCase()})`);
 }
 async function importFromFile(file){
   const text = await file.text();
@@ -1180,56 +1205,66 @@ async function importFromFile(file){
 }
 
 /* =========================================================
-  [BOX M] EVENTS
+  [BOX M] EVENTS (กันพัง)
 ========================================================= */
-el.startBtn.addEventListener("click", startQuest);
-el.pauseBtn.addEventListener("click", pauseQuest);
-el.resumeBtn.addEventListener("click", resumeQuest);
-el.stopBtn.addEventListener("click", stopQuest);
+function on(target, event, handler, name){
+  if(!target){
+    alert(`ERROR: element หาย -> ${name}`);
+    return;
+  }
+  target.addEventListener(event, handler);
+}
 
-el.reportMinutes.addEventListener("input", ()=>{
+on(el.startBtn, "click", startQuest, "startBtn");
+on(el.pauseBtn, "click", pauseQuest, "pauseBtn");
+on(el.resumeBtn, "click", resumeQuest, "resumeBtn");
+on(el.stopBtn, "click", stopQuest, "stopBtn");
+
+on(el.reportMinutes, "input", ()=>{
   const minutes = Number(el.reportMinutes.value);
   if(Number.isFinite(minutes)) applyBonusRule(minutes);
-});
+}, "reportMinutes");
 
-el.submitReportBtn.addEventListener("click", submitReport);
-el.discardBtn.addEventListener("click", discardReport);
+on(el.submitReportBtn, "click", submitReport, "submitReportBtn");
+on(el.discardBtn, "click", discardReport, "discardBtn");
+on(el.resetTodayBtn, "click", resetToday, "resetTodayBtn");
 
-el.category.addEventListener("change", ()=>{
+on(el.historyBtn, "click", openHistory, "historyBtn");
+on(el.closeOverlayBtn, "click", closeHistory, "closeOverlayBtn");
+on(el.overlay, "click", (e)=>{ if(e.target===el.overlay) closeHistory(); }, "overlay");
+
+on(el.exportBtn, "click", exportData, "exportBtn");
+on(el.importBtn, "click", ()=>{
+  el.importFile.value = "";
+  el.importFile.click();
+}, "importBtn");
+on(el.importFile, "change", async ()=>{
+  const file = el.importFile.files?.[0];
+  if(!file) return;
+  await importFromFile(file);
+}, "importFile");
+
+on(el.category, "change", ()=>{
   if(state.status==="idle"){
     state.selectedCategory = el.category.value;
     saveState();
   }
-});
-el.questName.addEventListener("input", ()=>{
+}, "category");
+on(el.questName, "input", ()=>{
   if(state.status==="idle"){
     state.questName = el.questName.value || "";
     saveState();
   }
-});
-
-el.historyBtn.addEventListener("click", openHistory);
-el.closeOverlayBtn.addEventListener("click", closeHistory);
-el.overlay.addEventListener("click", (e)=>{ if(e.target===el.overlay) closeHistory(); });
-
-el.resetTodayBtn.addEventListener("click", resetToday);
-
-el.exportBtn.addEventListener("click", exportData);
-el.importBtn.addEventListener("click", ()=>{
-  el.importFile.value = "";
-  el.importFile.click();
-});
-el.importFile.addEventListener("change", async ()=>{
-  const file = el.importFile.files?.[0];
-  if(!file) return;
-  await importFromFile(file);
-});
+}, "questName");
 
 /* =========================================================
   [BOX N] BOOT
 ========================================================= */
 function boot(){
   loadState();
+
+  // กัน overlay ค้างทับหน้าจอ
+  el.overlay.classList.remove("show");
 
   // ถ้า state หลุด (running แต่ไม่มี startTs) -> paused
   if(state.status==="running" && !state.startTs){
