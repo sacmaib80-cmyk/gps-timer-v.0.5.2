@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>QPS Timer v0.3 (Cute Stable + Help)</title>
+  <title>QPS Timer v0.3.3 (Stable + Help)</title>
 
   <style>
 /* =========================================================
-  [BOX 0] THEME (แก้สี/ฟอนต์ตรงนี้ที่เดียว)
+  [BOX 0] THEME
 ========================================================= */
 :root{
   --bg:#f6f9ff;
@@ -274,7 +274,7 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
 }
 .tooltip.show{ display:block; }
 .tooltip .tTitle{ font-weight: 950; margin: 0 0 6px; }
-.tooltip .tBody{ margin:0; color: var(--muted); font-size: 12px; line-height:1.5; }
+.tooltip .tBody{ margin:0; color: var(--muted); font-size: 12px; line-height:1.5; white-space:pre-line; }
 .tooltip .tActions{ display:flex; justify-content:flex-end; margin-top:10px; }
 .tooltip .tActions button{ padding:8px 10px; font-size:12px; border-radius: 12px; }
 
@@ -396,29 +396,51 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   margin-top: 12px;
 }
 .onBtns button{ padding: 10px 12px; font-size: 13px; border-radius: 14px; }
-/* ===== FIX REPORT BUTTONS PROPER ===== */
 
+/* =========================================================
+  REPORT BUTTONS FIX (Submit long + Discard right)
+========================================================= */
 #reportCard .btns{
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
-
-/* Submit ยืดกินพื้นที่ที่เหลือ */
 #submitReportBtn{
-  flex: 1;
+  flex:1;
   padding: 12px 16px;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 900;
   border-radius: 16px;
 }
-
-/* Discard อยู่ขวาสุด ขนาดปกติ */
 #discardBtn{
-  flex: 0 0 auto;
+  flex:0 0 auto;
   padding: 10px 14px;
   font-size: 13px;
   border-radius: 12px;
+}
+/* ===== Make select look same as input ===== */
+
+select{
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  height: 48px;
+  padding: 12px 40px 12px 12px;
+
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background-color: white;
+  font-size: 14px;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, #64748b 50%),
+    linear-gradient(135deg, #64748b 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
 }
 
   </style>
@@ -433,7 +455,7 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
         <div class="topbarRow">
           <div class="brand">
             <h1>
-              QPS Timer v 0.3.2
+              QPS Timer v 0.3.3
               <button class="helpBtn" type="button" id="helpTopBtn" data-tip="top">?</button>
             </h1>
             <div class="sub" id="todayText">Today: ----</div>
@@ -587,8 +609,6 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
           <div class="btns" style="margin-top:12px;">
             <button id="submitReportBtn" type="button">Submit</button>
             <button id="discardBtn" class="secondary" type="button">Discard</button>
-            
-        
           </div>
 
           <div class="ok" id="submitOk" style="display:none;"></div>
@@ -634,7 +654,7 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
     </div>
   </div>
 
-  <!-- ONBOARDING OVERLAY -->
+  <!-- ONBOARDING OVERLAY (ONLY GREEN BUTTON) -->
   <div class="overlay" id="onOverlay">
     <div class="onboard">
       <div class="onTop">
@@ -645,18 +665,16 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
             ถ้าไม่แน่ใจ กดปุ่ม <b>?</b> ตามจุดต่าง ๆ ได้เลย
           </p>
         </div>
-        <button class="secondary" type="button" id="skipOnBtn">Skip</button>
       </div>
 
       <ol class="onSteps">
         <li>เลือก <b>Category</b> และตั้ง <b>Quest Name</b> (ห้ามซ้ำในวันเดียว)</li>
         <li>กด <b>Start</b> เพื่อเริ่มจับเวลา</li>
         <li>กด <b>Stop</b> แล้วกรอก Report เพื่อบันทึกคะแนน</li>
-        <li>กด <b>History / Export</b> เพื่อดูย้อนหลังหรือส่งให้คนอื่น</li>
+        <li>ดูย้อนหลังด้วย <b>History</b> หรือสำรองด้วย <b>Export</b></li>
       </ol>
 
       <div class="onBtns">
-        <button class="secondary" type="button" id="showTipsBtn">Show tips (guided)</button>
         <button type="button" id="okOnBtn">Got it</button>
       </div>
     </div>
@@ -664,7 +682,7 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
 
 <script>
 /* =========================================================
-  [BOX A] CONFIG / STORAGE KEYS
+  CONFIG / STORAGE KEYS
 ========================================================= */
 const KEY_STATE   = "qps_timer_state_v3";
 const KEY_DATA    = "qpsData_v3";
@@ -675,11 +693,11 @@ const KEY_ONBOARD = "qps_onboard_seen_v1";
 const RULES = {
   basePerMinute: 0.4,
   bonusMinMinutes: 30,
-  baseCapPerQuestNamePerDay: 60, // ✅ cap ใหม่: ต่อชื่อเควส ต่อวัน
+  baseCapPerQuestNamePerDay: 60,
 };
 
 /* =========================================================
-  [BOX B] UTIL
+  UTIL
 ========================================================= */
 function localDateKey(d = new Date()){
   const y=d.getFullYear();
@@ -710,7 +728,7 @@ function normQuestName(name){
 }
 
 /* =========================================================
-  [BOX C] DATA LAYER
+  DATA LAYER
 ========================================================= */
 function loadAll(){
   try { return JSON.parse(localStorage.getItem(KEY_DATA)) || {}; }
@@ -742,8 +760,6 @@ function listDays(){
   const data = loadAll();
   return Object.keys(data).sort().reverse();
 }
-
-/* ✅ cap ใหม่: รวม base minutes ที่ใช้ไปแล้ว "ตาม Quest Name" ในวันนั้น */
 function calcQuestBaseMinutesUsed(dateKey, questName){
   const data = loadAll();
   const day = data[dateKey];
@@ -753,8 +769,6 @@ function calcQuestBaseMinutesUsed(dateKey, questName){
     .filter(x => (normQuestName(x.questName).toLowerCase() === qn))
     .reduce((s,x) => s + (Number(x.baseMinutesUsed)||0), 0);
 }
-
-/* ✅ ตรวจชื่อซ้ำในวันเดียว (กันคะแนนทับ/กันกดมั่ว) */
 function isQuestNameDuplicateToday(dateKey, questName){
   const data = loadAll();
   const day = data[dateKey];
@@ -764,7 +778,7 @@ function isQuestNameDuplicateToday(dateKey, questName){
 }
 
 /* =========================================================
-  [BOX D] STREAK (คำนวณจาก log จริง)
+  STREAK
 ========================================================= */
 function loadStreak(){
   const raw = localStorage.getItem(KEY_STREAK);
@@ -812,7 +826,7 @@ function updateStreakAfterChange(){
 }
 
 /* =========================================================
-  [BOX E] UNDO/REDO (เก็บ snapshot ขนาดเล็ก)
+  UNDO/REDO
 ========================================================= */
 function loadUndo(){
   try { return JSON.parse(localStorage.getItem(KEY_UNDO)) || { undo: null, redo: null }; }
@@ -820,9 +834,7 @@ function loadUndo(){
 }
 function saveUndo(u){ localStorage.setItem(KEY_UNDO, JSON.stringify(u)); }
 
-function snapshotData(){
-  return loadAll();
-}
+function snapshotData(){ return loadAll(); }
 function applySnapshot(snap){
   if(!snap || typeof snap !== "object") return;
   saveAll(snap);
@@ -867,7 +879,7 @@ function doRedo(){
 }
 
 /* =========================================================
-  [BOX F] ELEMENTS
+  ELEMENTS
 ========================================================= */
 const el = {
   todayText: document.getElementById("todayText"),
@@ -895,8 +907,6 @@ const el = {
   capHint: document.getElementById("capHint"),
   submitReportBtn: document.getElementById("submitReportBtn"),
   discardBtn: document.getElementById("discardBtn"),
-  helpReportBtn: document.getElementById("helpReportBtn"),
-  factoryResetBtn: document.getElementById("factoryResetBtn"),
   submitOk: document.getElementById("submitOk"),
   submitWarn: document.getElementById("submitWarn"),
 
@@ -919,26 +929,22 @@ const el = {
   dayView: document.getElementById("dayView"),
   histTitle: document.getElementById("histTitle"),
 
-  // tooltip
   tooltip: document.getElementById("tooltip"),
   tipArrow: document.getElementById("tipArrow"),
   tipTitle: document.getElementById("tipTitle"),
   tipBody: document.getElementById("tipBody"),
   tipCloseBtn: document.getElementById("tipCloseBtn"),
 
-  // onboarding
   onOverlay: document.getElementById("onOverlay"),
   openOnboardBtn: document.getElementById("openOnboardBtn"),
   okOnBtn: document.getElementById("okOnBtn"),
-  skipOnBtn: document.getElementById("skipOnBtn"),
-  showTipsBtn: document.getElementById("showTipsBtn"),
 };
 
 /* =========================================================
-  [BOX G] TIMER STATE
+  TIMER STATE
 ========================================================= */
 let state = {
-  status: "idle",     // idle | running | paused | stopped
+  status: "idle",
   startTs: null,
   elapsedBefore: 0,
   startDateKey: null,
@@ -961,7 +967,7 @@ function loadState(){
 }
 
 /* =========================================================
-  [BOX H] UI
+  UI
 ========================================================= */
 function setReportVisible(v){
   el.reportCard.style.display = v ? "block" : "none";
@@ -1073,13 +1079,11 @@ function updateUI(){
 /* tick */
 function startTick(){
   if(tickHandle) return;
-  tickHandle = setInterval(()=>{
-    renderTimer();
-  }, 250);
+  tickHandle = setInterval(()=>{ renderTimer(); }, 250);
 }
 
 /* =========================================================
-  [BOX I] RULES (bonus lock + cap hint)
+  RULES (bonus lock + cap hint)
 ========================================================= */
 function applyBonusRule(minutes){
   if(minutes < RULES.bonusMinMinutes){
@@ -1099,7 +1103,7 @@ function updateCapHint(dateKey, questName){
 }
 
 /* =========================================================
-  [BOX J] ACTIONS
+  ACTIONS
 ========================================================= */
 function validateBeforeStart(){
   clearNameWarn();
@@ -1213,7 +1217,6 @@ function submitReport(){
   const dateKey = state.startDateKey || localDateKey();
   const qn = normQuestName(state.questName);
 
-  // ✅ cap ตามชื่อเควส (รวมทุกครั้งในวันเดียว)
   const used = calcQuestBaseMinutesUsed(dateKey, qn);
   const remaining = Math.max(0, RULES.baseCapPerQuestNamePerDay - used);
   const baseMinutesUsed = Math.min(minutes, remaining);
@@ -1221,14 +1224,12 @@ function submitReport(){
   const baseScore = baseMinutesUsed * RULES.basePerMinute;
   const questScore = baseScore + bonus;
 
-  // ✅ กันชื่อซ้ำแบบ “สุดท้ายก่อนบันทึก”
   if(isQuestNameDuplicateToday(dateKey, qn)){
     el.submitWarn.style.display="block";
-    el.submitWarn.textContent="ชื่อเควสซ้ำในวันนี้แล้ว (มีคน/ตัวเองบันทึกไปก่อนหน้า) ให้เปลี่ยนชื่อ";
+    el.submitWarn.textContent="ชื่อเควสซ้ำในวันนี้แล้ว — เปลี่ยนชื่อ";
     return;
   }
 
-  // ✅ undo snapshot ก่อนแก้ data
   pushUndoSnapshot();
 
   const entry = {
@@ -1258,10 +1259,7 @@ function submitReport(){
 
   el.notes.value = "";
 
-  setTimeout(()=>{
-    discardReport();
-    updateUI();
-  }, 320);
+  setTimeout(()=>{ discardReport(); }, 320);
 }
 
 function resetToday(){
@@ -1279,23 +1277,8 @@ function resetToday(){
   showTimerWarn("เคลียร์ข้อมูลวันนี้แล้ว");
 }
 
-function factoryReset(){
-  const ok = confirm("Factory Reset? จะล้าง state/data/undo/onboarding ทั้งหมด");
-  if(!ok) return;
-
-  localStorage.removeItem(KEY_STATE);
-  localStorage.removeItem(KEY_DATA);
-  localStorage.removeItem(KEY_UNDO);
-  // streak ไม่ล้างก็ได้ แต่ล้างให้หมดตาม factory
-  localStorage.removeItem(KEY_STREAK);
-  localStorage.removeItem(KEY_ONBOARD);
-
-  // รีโหลดหน้าใหม่
-  location.reload();
-}
-
 /* =========================================================
-  [BOX K] HISTORY
+  HISTORY
 ========================================================= */
 let selectedDay = null;
 
@@ -1364,7 +1347,7 @@ function renderDayView(dayKey){
 }
 
 /* =========================================================
-  [BOX L] EXPORT/IMPORT
+  EXPORT/IMPORT
 ========================================================= */
 function downloadJson(filename, obj){
   const blob = new Blob([JSON.stringify(obj, null, 2)], { type:"application/json" });
@@ -1442,29 +1425,14 @@ async function importFromFile(file){
 }
 
 /* =========================================================
-  [BOX M] TOOLTIP SYSTEM
+  TOOLTIP
 ========================================================= */
 const TIPS = {
-  top: {
-    title: "ภาพรวม",
-    body: "หลักการ: Start → Stop → Report → ได้คะแนน\nถ้ากดผิดใช้ Undo/Redo ได้ (Today)."
-  },
-  timer: {
-    title: "Timer",
-    body: "เลือกหมวด + ตั้ง Quest Name แล้วกด Start เพื่อเริ่มจับเวลา\nPause/Resume ได้\nStop แล้วค่อย Report (กันมั่ว)."
-  },
-  name: {
-    title: "Quest Name (ห้ามซ้ำ)",
-    body: "ชื่อต้องไม่ซ้ำในวันเดียว เพื่อกันคะแนนทับกัน\nCap base จะนับตามชื่อเควสนี้ (60 นาที/วัน/ชื่อ)."
-  },
-  today: {
-    title: "Today",
-    body: "ดูคะแนนรวมวันนี้ + รายการเควสทั้งหมด\nUndo/Redo ใช้แก้ “รายการล่าสุด” แบบปลอดภัย\nExport/Import ใช้ส่งให้ลูกค้า/แบ็คอัพ."
-  },
-  report: {
-    title: "Report",
-    body: "กรอก Minutes + Bonus + Notes แล้ว Submit\nBonus ใช้ได้เฉพาะเวลา ≥ 30 นาที\nถ้า base เกิน cap จะนับ base เท่าที่เหลือ แต่ bonus ยังได้."
-  }
+  top:   { title: "ภาพรวม", body: "หลักการ: Start → Stop → Report → ได้คะแนน\nถ้ากดผิดใช้ Undo/Redo ได้ (Today)." },
+  timer: { title: "Timer", body: "เลือกหมวด + ตั้ง Quest Name แล้วกด Start\nPause/Resume ได้\nStop แล้วค่อย Report." },
+  name:  { title: "Quest Name (ห้ามซ้ำ)", body: "ชื่อต้องไม่ซ้ำในวันเดียว\nCap base จะนับตามชื่อเควสนี้ (60 นาที/วัน/ชื่อ)." },
+  today: { title: "Today", body: "ดูคะแนนรวมวันนี้ + รายการเควส\nUndo/Redo แก้การเปลี่ยนล่าสุดได้\nExport/Import ใช้ส่ง/แบ็คอัพ." },
+  report:{ title: "Report", body: "กรอก Minutes + Bonus + Notes แล้ว Submit\nBonus ใช้ได้เมื่อเวลา ≥ 30 นาที\nถ้า base เกิน cap จะนับ base เท่าที่เหลือ." }
 };
 
 function showTooltip(anchorEl, tipKey){
@@ -1475,9 +1443,8 @@ function showTooltip(anchorEl, tipKey){
   const rect = anchorEl.getBoundingClientRect();
   const pad = 10;
   const tw = Math.min(340, window.innerWidth - 24);
-  const th = 140; // คร่าว ๆ
+  const th = 140;
 
-  // วางด้านล่างของปุ่มก่อน ถ้าชนจอค่อยขึ้นบน
   let left = Math.min(window.innerWidth - tw - 12, Math.max(12, rect.left));
   let top  = rect.bottom + pad;
 
@@ -1490,7 +1457,6 @@ function showTooltip(anchorEl, tipKey){
   el.tooltip.style.top  = top + "px";
   el.tooltip.classList.add("show");
 
-  // ลูกศร
   const arrowSize = 14;
   let ax = Math.min(window.innerWidth - arrowSize - 12, Math.max(12, rect.left + 8));
   let ay = (top > rect.top) ? (rect.bottom + 2) : (rect.top - arrowSize - 2);
@@ -1498,39 +1464,13 @@ function showTooltip(anchorEl, tipKey){
   el.tipArrow.style.top  = ay + "px";
   el.tipArrow.classList.add("show");
 }
-
 function hideTooltip(){
   el.tooltip.classList.remove("show");
   el.tipArrow.classList.remove("show");
 }
 
-/* guided tips for onboarding */
-const GUIDED_KEYS = ["timer","name","today","report"];
-let guidedIdx = 0;
-function startGuided(){
-  guidedIdx = 0;
-  stepGuided();
-}
-function stepGuided(){
-  const key = GUIDED_KEYS[guidedIdx];
-  if(!key){ hideTooltip(); return; }
-
-  // หา element helpBtn ของ tip นั้น
-  const btn = document.querySelector(`.helpBtn[data-tip="${key}"]`);
-  if(!btn){ guidedIdx++; stepGuided(); return; }
-  showTooltip(btn, key);
-}
-function nextGuided(){
-  guidedIdx++;
-  if(guidedIdx >= GUIDED_KEYS.length){
-    hideTooltip();
-    return;
-  }
-  stepGuided();
-}
-
 /* =========================================================
-  [BOX N] ONBOARDING
+  ONBOARDING
 ========================================================= */
 function openOnboarding(){
   el.onOverlay.classList.add("show");
@@ -1545,7 +1485,7 @@ function maybeShowOnboardingFirstTime(){
 }
 
 /* =========================================================
-  [BOX O] EVENTS
+  EVENTS
 ========================================================= */
 el.startBtn.addEventListener("click", startQuest);
 el.pauseBtn.addEventListener("click", pauseQuest);
@@ -1559,8 +1499,6 @@ el.reportMinutes.addEventListener("input", ()=>{
 
 el.submitReportBtn.addEventListener("click", submitReport);
 el.discardBtn.addEventListener("click", discardReport);
-el.helpReportBtn.addEventListener("click", ()=> openOnboarding());
-el.factoryResetBtn.addEventListener("click", factoryReset);
 
 el.category.addEventListener("change", ()=>{
   if(state.status==="idle"){
@@ -1601,17 +1539,12 @@ document.querySelectorAll(".helpBtn[data-tip]").forEach(btn=>{
   btn.addEventListener("click", (e)=>{
     e.stopPropagation();
     const key = btn.dataset.tip;
-    // toggle
-    if(el.tooltip.classList.contains("show")){
-      hideTooltip();
-    }else{
-      showTooltip(btn, key);
-    }
+    if(el.tooltip.classList.contains("show")) hideTooltip();
+    else showTooltip(btn, key);
   });
 });
 el.tipCloseBtn.addEventListener("click", hideTooltip);
 document.addEventListener("click", (e)=>{
-  // click outside => close tooltip
   if(el.tooltip.classList.contains("show")){
     const t = el.tooltip.contains(e.target);
     const hb = e.target.classList && e.target.classList.contains("helpBtn");
@@ -1621,34 +1554,23 @@ document.addEventListener("click", (e)=>{
 window.addEventListener("resize", ()=>{ if(el.tooltip.classList.contains("show")) hideTooltip(); });
 window.addEventListener("scroll", ()=>{ if(el.tooltip.classList.contains("show")) hideTooltip(); }, true);
 
-/* onboarding events */
+/* onboarding events (ONLY GOT IT) */
 el.openOnboardBtn.addEventListener("click", ()=> openOnboarding());
 el.okOnBtn.addEventListener("click", ()=> closeOnboarding(true));
-el.skipOnBtn.addEventListener("click", ()=> closeOnboarding(true));
-el.showTipsBtn.addEventListener("click", ()=>{
-  closeOnboarding(true);
-  startGuided();
-});
-
-/* guided: click tooltip close => next when guided */
-el.tipCloseBtn.addEventListener("click", ()=>{
-  if(GUIDED_KEYS.includes(GUIDED_KEYS[guidedIdx])) nextGuided();
-});
+el.onOverlay.addEventListener("click", (e)=>{ if(e.target===el.onOverlay) closeOnboarding(true); });
 
 /* =========================================================
-  [BOX P] BOOT
+  BOOT
 ========================================================= */
 function boot(){
   loadState();
 
-  // กัน state เพี้ยน
   if(state.status==="running" && !state.startTs){
     state.status="paused";
     state.startTs=null;
     saveState();
   }
 
-  // โหลดฟอร์ม
   if(state.status==="idle"){
     el.category.value = state.selectedCategory || "Learning";
     el.questName.value = state.questName || "";
