@@ -828,7 +828,7 @@
             </div>
           </div>
 
-          <!-- Morning Gate Settings (โผล่เฉพาะตอน ON ตามที่สั่ง) -->
+          <!-- Morning Gate Settings (โผล่เฉพาะตอน ON หรือ “ยังไม่ตั้ง Trigger” เท่านั้น) -->
           <div class="gateSettings" id="gateSettingsBox" style="display:none;">
             <div class="gateSettingsHead">
               <div class="gateSettingsTitle">
@@ -1478,7 +1478,6 @@ function loadGateCfg(){
   if(!Number.isFinite(gateCfg.lockedUntil)) gateCfg.lockedUntil = 0;
   if(gateCfg.effectiveFrom && !/^\d{4}-\d{2}-\d{2}$/.test(gateCfg.effectiveFrom)) gateCfg.effectiveFrom = null;
 
-
   saveGateCfg(); // normalize
 }
 function saveGateCfg(){
@@ -1786,23 +1785,25 @@ function renderGateCoverDisplay(){
   el.gateQualifyDisplay.textContent = `${GATE_RULES.qualifyMin}m`;
 }
 function renderGateSettingsUI(){
+  // ✅ โผล่เมื่อ: ON หรือ “ยังไม่ตั้ง Trigger” (เพื่อให้ตั้งครั้งแรกได้ตอน OFF)
+  const shouldShow = gateCfg.enabled || !gateCfg.triggerHHMM;
+  el.gateSettingsBox.style.display = shouldShow ? "block" : "none";
 
-  const shouldShow =
-    gateCfg.enabled || !gateCfg.triggerHHMM;
-
-  el.gateSettingsBox.style.display =
-    shouldShow ? "block" : "none";
-
+  // ถ้า OFF และตั้งแล้ว -> ไม่ต้องแสดง/ไม่ต้องแก้ค่า
   if(!gateCfg.enabled && gateCfg.triggerHHMM){
     return;
-  } 
-  // ถ้า OFF ก็จบ
-  if(!gateCfg.enabled) return;
+  }
 
+  // ใส่ค่า input (ทั้งตอน ON หรือ ตอนยังไม่ตั้ง)
   el.gateTriggerTimeInput.value = gateCfg.triggerHHMM || "";
 
   if(!gateCfg.triggerHHMM){
-    el.gateTriggerHint.textContent = "ยังไม่ตั้ง Trigger → แสดงเป็น --.-- และ Gate จะไม่ทำงาน";
+    el.gateTriggerHint.textContent = "ยังไม่ตั้ง Trigger → แสดงเป็น --.-- (ตั้งได้แม้ยัง OFF)";
+    return;
+  }
+
+  if(!gateCfg.enabled){
+    el.gateTriggerHint.textContent = "ตั้งแล้ว • เปิด ON เพื่อใช้งาน Morning Gate";
     return;
   }
 
@@ -1844,7 +1845,7 @@ function renderGateUX(){
     el.gateCoverStatusChip.textContent = (!gateCfg.triggerHHMM ? "STATUS: NOT SET" : "STATUS: OFF");
     el.gateCoverTime.textContent = (!gateCfg.triggerHHMM ? "--.--" : "OFF");
     el.gateCoverHint.innerHTML = (!gateCfg.triggerHHMM)
-      ? `ยังไม่ตั้ง Trigger • เปิด ON แล้วตั้งเวลา`
+      ? `ยังไม่ตั้ง Trigger • ตั้งเวลาได้ด้านล่าง แล้วค่อยเปิด ON`
       : `Gate ปิดอยู่`;
     return;
   }
@@ -2710,7 +2711,7 @@ el.gateTopOpenBtn.addEventListener("click", ()=>{
   }
 });
 
-// ✅ ตามที่สั่ง: OFF แล้ว Gate หาย / ON แล้วค่อยมีหน้าเด้ง
+// ✅ OFF แล้ว Gate หาย / ON แล้วค่อยบังคับ
 el.gateToggleBtn.addEventListener("click", ()=>{
   if(state.status !== "idle"){
     showTimerWarn("เปลี่ยน Gate ได้ตอน Idle เท่านั้น");
@@ -2718,7 +2719,7 @@ el.gateToggleBtn.addEventListener("click", ()=>{
   }
 
   if(!gateCfg.triggerHHMM){
-    showTimerWarn("ตั้ง Trigger ก่อน");
+    showTimerWarn("ตั้ง Trigger ก่อน (ด้านล่าง)");
     gateCfg.enabled = false;
     saveGateCfg();
     syncGateRuntimeFromCfg();
@@ -2733,7 +2734,6 @@ el.gateToggleBtn.addEventListener("click", ()=>{
   saveGateCfg();
   syncGateRuntimeFromCfg();
 
-  // ถ้าปิด: เคลียร์ overlay ทันที
   if(!gateCfg.enabled){
     hideGateCover();
     hideGateTopBar();
@@ -2747,16 +2747,12 @@ el.gateToggleBtn.addEventListener("click", ()=>{
   showTimerWarn(gateCfg.enabled ? "Morning Gate: ON" : "Morning Gate: OFF");
 });
 
-// Gate trigger time change (ทำงานได้เฉพาะตอน ON + idle)
+// ✅ FIX: Gate trigger time change (แก้ deadlock)
+// - ตั้งได้แม้ OFF “เฉพาะครั้งแรก” (ตอนยังเป็น --.--)
+// - ถ้าตั้งแล้วและ OFF อยู่: จะไม่ให้เปลี่ยน (ต้องเปิด ON ก่อน)
 el.gateTriggerTimeInput.addEventListener("change", ()=>{
   if(state.status !== "idle"){
     showTimerWarn("ตั้งค่าได้ตอน Idle เท่านั้น");
-    renderGateSettingsUI();
-    return;
-  }
-  if(!gateCfg.enabled){
-    // ตามสเปค: OFF แล้วการ์ดไม่โผล่ แต่กันไว้
-    showTimerWarn("ต้องเปิด ON ก่อนถึงจะตั้งได้");
     renderGateSettingsUI();
     return;
   }
@@ -2764,6 +2760,14 @@ el.gateTriggerTimeInput.addEventListener("change", ()=>{
   const hhmm = el.gateTriggerTimeInput.value;
   if(!hhmm){
     showTimerWarn("ต้องเลือกเวลา");
+    renderGateSettingsUI();
+    return;
+  }
+
+  // ถ้า OFF และเคยตั้ง trigger แล้ว -> กันแก้ (ตามสเปค: การ์ดไม่ควรโผล่ด้วย)
+  if(!gateCfg.enabled && gateCfg.triggerHHMM){
+    showTimerWarn("ถ้าจะเปลี่ยน Trigger ให้เปิด ON ก่อน");
+    el.gateTriggerTimeInput.value = gateCfg.triggerHHMM;
     renderGateSettingsUI();
     return;
   }
