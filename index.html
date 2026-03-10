@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>SakuraQ v0.7.6</title>
+    <title>SakuraQ v0.7.7</title>
 
     <style>
       :root{
@@ -2310,6 +2310,122 @@ linear-gradient(
 .app{
   padding-bottom:150px;
 }
+
+
+/* =========================
+   ACTION LOCK BAR
+========================= */
+.actionLockBar{
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  z-index: 10090;
+
+  opacity: 0;
+  transform: translateY(16px) scale(.98);
+  pointer-events: none;
+
+  transition:
+    opacity .22s ease,
+    transform .22s ease;
+}
+
+.actionLockBar.show{
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.actionLockInner{
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  max-width: 560px;
+  margin: 0 auto;
+  min-height: 78px;
+}
+
+.actionLockMascot{
+  position: absolute;
+  left: -2px;
+  bottom: -2px;
+  width: 78px;
+  height: 78px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.actionLockMascot img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 10px 18px rgba(15,23,42,.16));
+}
+
+.actionLockBubble{
+  margin-left: 54px;
+  width: 100%;
+  min-height: 64px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 12px 14px 12px 18px;
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,.92),
+    rgba(255,255,255,.78)
+  );
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow:
+    0 14px 34px rgba(15,23,42,.10),
+    inset 0 1px 0 rgba(255,255,255,.65);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.actionLockText{
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 850;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+
+/* mobile tweak */
+@media (max-width: 640px){
+  .actionLockBar{
+    left: 8px;
+    right: 8px;
+    bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .actionLockInner{
+    min-height: 72px;
+  }
+
+  .actionLockMascot{
+    width: 108px;
+    height: 108px;
+    left: -2px;
+    bottom: -20px;
+  }
+
+  .actionLockBubble{
+    margin-left: 55px;
+    min-height: 40px;
+    padding: 11px 12px 11px 17px;
+    border-radius: 16px;
+  }
+
+  .actionLockText{
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
 </style>
 </head>
 <body>
@@ -2424,7 +2540,7 @@ linear-gradient(
           <div class="brandMeta">
             <div class="brandTitleRow">
               <h1>SakuraQ</h1>
-              <span class="versionBadge">v0.7.6</span>
+              <span class="versionBadge">v0.7.7</span>
             </div>
             <div class="sub" id="todayText">Today: ----</div>
           </div>
@@ -2841,8 +2957,22 @@ linear-gradient(
     <span>☰</span>
     <span>Menu</span>
   </button>
-</nav>
+</nav> 
 
+<!-- Sakura Action Lock Bar -->
+<div id="actionLockBar" class="actionLockBar" aria-hidden="true">
+  <div class="actionLockInner">
+    <div class="actionLockMascot">
+      <img src="mascord.png" alt="SakuraQ mascot warning">
+    </div>
+
+    <div class="actionLockBubble">
+      <div id="actionLockText" class="actionLockText">
+       อ้ะ! ตอนนี้กำลังทำเควสอยู่ ยังใช้ฟังก์ชันนี้ไม่ได้นะ
+      </div>
+    </div>
+  </div>
+</div>
   <script>
 /* =========================================================
   QPS Timer v0.6.x — Full JS (Safe/Null-Guard) + Gate Page v2
@@ -3303,6 +3433,9 @@ homeUserSub: $("homeUserSub"),
     topMenuGateBtn: $("topMenuGateBtn"),
     topMenuGateState: $("topMenuGateState"),
     topMenuGuideBtn: $("topMenuGuideBtn"),
+
+   actionLockBar: $("actionLockBar"),
+actionLockText: $("actionLockText"),
   };
 
   /* =========================
@@ -3936,6 +4069,24 @@ function renderTopMenuUI(){
     el.timerWarn.textContent=msg;
     setTimeout(()=>{ if(el.timerWarn){ el.timerWarn.style.display="none"; el.timerWarn.textContent=""; } }, 2300);
   }
+
+
+
+let actionLockBarTimer = null;
+
+function showActionLockBar(msg){
+  if(!el.actionLockBar || !el.actionLockText) return;
+
+  el.actionLockText.textContent = msg || "ตอนนี้กำลังทำเควสอยู่ ยังใช้ฟังก์ชันนี้ไม่ได้";
+  el.actionLockBar.classList.add("show");
+  el.actionLockBar.setAttribute("aria-hidden", "false");
+
+  if(actionLockBarTimer) clearTimeout(actionLockBarTimer);
+  actionLockBarTimer = setTimeout(()=>{
+    el.actionLockBar?.classList.remove("show");
+    el.actionLockBar?.setAttribute("aria-hidden", "true");
+  }, 2200);
+}
   function showNameWarn(msg){
     if(!el.nameWarn) return;
     el.nameWarn.style.display="block";
@@ -5363,15 +5514,15 @@ function clearReportDraft(){
     e.stopPropagation();
   });
 
-  on(el.topMenuGateBtn, "click", ()=>{
-    closeTopMenu();
+ on(el.topMenuGateBtn, "click", ()=>{
+  closeTopMenu();
 
-    if(state.status !== "idle"){
-      showTimerWarn("เข้า Gate ได้ตอน Idle เท่านั้น");
-      return;
-    }
-    openGatePage();
-  });
+  if(state.status !== "idle"){
+    showActionLockBar("อ้ะ! กำลังทำเควสอยู่ ยังเข้า Morning Gate ไม่ได้นะ");
+    return;
+  }
+  openGatePage();
+});
   
 
   on(el.topMenuGuideBtn, "click", ()=>{
@@ -5448,9 +5599,9 @@ on(el.notes, "input", saveReportDraft);
   // cutting time
   on(el.cutToggleBtn, "click", ()=>{
     if(state.status !== "idle"){
-      showTimerWarn("ตั้งเวลาได้ก่อน Start เท่านั้น");
-      return;
-    }
+  showTimerWarn("ตั้งเวลาได้ก่อน Start เท่านั้น");
+  return;
+}
     state.cutEnabled = !state.cutEnabled;
     if(!state.cutEnabled){
       state.cutMinutes = null;
@@ -5551,10 +5702,10 @@ on(el.notes, "input", saveReportDraft);
 
   // Toggle ON/OFF inside Gate Page
   on(el.gatePageEnableBtn, "click", ()=>{
-    if(state.status !== "idle"){
-      showTimerWarn("เปลี่ยน Gate ได้ตอน Idle เท่านั้น");
-      return;
-    }
+   if(state.status !== "idle"){
+  showActionLockBar("อ้ะ! กำลังทำเควสอยู่ ยังเปิด-ปิด Morning Gate ไม่ได้นะ");
+  return;
+}
     if(!gateCfg.triggerHHMM){
       showTimerWarn("ตั้ง Trigger ก่อน");
       gateCfg.enabled = false;
@@ -5587,10 +5738,10 @@ on(el.notes, "input", saveReportDraft);
   // Trigger change inside Gate Page
   on(el.gatePageTriggerInput, "change", ()=>{
     if(state.status !== "idle"){
-      showTimerWarn("ตั้งค่าได้ตอน Idle เท่านั้น");
-      renderGatePageUI();
-      return;
-    }
+  showActionLockBar("อ้ะ! กำลังทำเควสอยู่ ยังเปลี่ยนเวลา Trigger ไม่ได้นะ");
+  renderGatePageUI();
+  return;
+}
 
     const hhmm = el.gatePageTriggerInput?.value;
     if(!hhmm){
@@ -5706,10 +5857,10 @@ function switchPage(pageId){
   /* ===== Random Quest events ===== */
 on(el.diceBtn, "click", ()=>{
   // ถ้ากำลังทำเควสอยู่ ไม่ให้เปิด dice
-  if(state.status === "running" || state.status === "paused"){
-    showTimerWarn("กำลังทำเควสอยู่");
-    return;
-  }
+ if(state.status === "running" || state.status === "paused"){
+  showActionLockBar("อ้ะ! กำลังทำเควสอยู่ ต้องหยุดหรือส่งรายงานก่อนนะ");
+  return;
+}
 
   const selected = rqGetSelected();
 
