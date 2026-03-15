@@ -3120,6 +3120,17 @@ linear-gradient(
   - Gate Page opens ONLY from top-right button #gateToggleBtn
   - Robust: missing HTML parts won't crash (null guards)
 ========================================================= */
+let activeQuest = null
+let questStartTime = null
+let questEndTime = null
+let questDurationMs = 0
+
+let questFinished = false
+let notified = false
+
+let notificationMode = "quiet"   // "quiet" | "smart"
+let notificationSound = true
+let smartWarnSent = false
 
   /* =========================
     STORAGE KEYS
@@ -5268,6 +5279,11 @@ function rqStartNow(){
         const ms = computeElapsedMs();
         const targetMs = state.cutMinutes * 60000;
 
+        if(!questFinished && questEndTime && ms >= targetMs){
+  questFinished = true
+  sendQuestDoneNotification()
+}
+
         if(ms >= targetMs){
           if(state.cutMode === "soft"){
             if(!state.softWarned){
@@ -5277,7 +5293,7 @@ function rqStartNow(){
               showTimerWarn(`ครบ ${state.cutMinutes} นาทีแล้ว — จะหยุดอัตโนมัติใน 10 วิ`);
               return;
             }
-            if(Date.now() < state.softDeadlineTs) return;
+         
           }
 
           state.softWarned = false;
@@ -5323,47 +5339,62 @@ function rqStartNow(){
     return true;
   }
 
-  function startQuest(){
-    if(state.status !== "idle") return;
+  async function startQuest(){
+  if(state.status !== "idle") return;
 
-    if(!gateCanStartQuest()){
-      showTimerWarn("ติด Morning Gate");
-      if(isGateActiveToday() && gateIsWorldActiveNow() && !gate.startedAt){
-        showGateCover();
-        renderGateUX();
-      }
-      return;
+  resetNotificationFlags();
+
+  const perm = await ensureNotificationPermission();
+  console.log("Notification permission:", perm);
+
+  if(!gateCanStartQuest()){
+    showTimerWarn("ติด Morning Gate");
+    if(isGateActiveToday() && gateIsWorldActiveNow() && !gate.startedAt){
+      showGateCover();
+      renderGateUX();
     }
-
-    if(!validateBeforeStart()){
-      showTimerWarn("แก้ Quest Name ก่อน");
-      return;
-    }
-
-    state.status="running";
-    state.selectedCategory = el.category?.value || state.selectedCategory;
-    state.questName = normQuestName(el.questName?.value);
-    state.startDateKey = localDateKey();
-
-    state.startTs = Date.now();
-    state.elapsedBefore = 0;
-    state.lastElapsedMs = 0;
-
-    state.cutMinutes = state.cutEnabled ? readCutMinutes() : null;
-    state.cutMode = el.cutMode?.value || "hard";
-    state.softWarned = false;
-    state.softDeadlineTs = 0;
-
-    saveState();
-    clearSubmitMessages();
-    setReportVisible(false);
-    updateUI();
-
-    if(isGateActiveToday() && gateIsWorldActiveNow() && !gate.passed && !isFirstQuestAlreadyDoneToday()){
-      gate.firstQuestStartAt = Date.now();
-      saveGate();
-    }
+    return;
   }
+
+  if(!validateBeforeStart()){
+    showTimerWarn("แก้ Quest Name ก่อน");
+    return;
+  }
+
+  state.status = "running";
+  state.selectedCategory = el.category?.value || state.selectedCategory;
+  state.questName = normQuestName(el.questName?.value);
+  state.startDateKey = localDateKey();
+
+  state.startTs = Date.now();
+  state.elapsedBefore = 0;
+  state.lastElapsedMs = 0;
+
+  state.cutMinutes = state.cutEnabled ? readCutMinutes() : null;
+  state.cutMode = el.cutMode?.value || "hard";
+  state.softWarned = false;
+  state.softDeadlineTs = 0;
+
+  activeQuest = {
+    category: state.selectedCategory,
+    name: state.questName
+  };
+
+  questStartTime = state.startTs;
+  questDurationMs = (state.cutEnabled && state.cutMinutes) ? state.cutMinutes * 60000 : 0;
+  questEndTime = questDurationMs ? (questStartTime + questDurationMs) : null;
+  questFinished = false;
+
+  saveState();
+  clearSubmitMessages();
+  setReportVisible(false);
+  updateUI();
+
+  if(isGateActiveToday() && gateIsWorldActiveNow() && !gate.passed && !isFirstQuestAlreadyDoneToday()){
+    gate.firstQuestStartAt = Date.now();
+    saveGate();
+  }
+}
 
   function pauseQuest(){
     if(state.status!=="running") return;
@@ -5393,10 +5424,12 @@ function rqStartNow(){
   const now = Date.now();
   const elapsed = (state.status==="running") ? computeElapsedMs(now) : state.elapsedBefore;
 
-  state.status="stopped";
-  state.startTs=null;
-  state.elapsedBefore=elapsed;
-  state.lastElapsedMs=elapsed;
+  state.status = "stopped";
+  state.startTs = null;
+  state.elapsedBefore = elapsed;
+  state.lastElapsedMs = elapsed;
+
+  questFinished = true;
   saveState();
 
   const minutes = Math.max(0, Math.round(elapsed/60000));
@@ -5409,28 +5442,40 @@ function rqStartNow(){
   clearSubmitMessages();
   setReportVisible(true);
 
-  saveReportDraft(); // ✅ เพิ่มบรรทัดนี้
+  saveReportDraft();
 
   updateUI();
   scrollToId("sec-report");
+
+  activeQuest = null;
+  questStartTime = null;
+  questEndTime = null;
+  questDurationMs = 0;
+  resetNotificationFlags();
 }
-  function discardReport(){
-    state.status="idle";
-    state.startTs=null;
-    state.elapsedBefore=0;
-    state.lastElapsedMs=0;
-    state.startDateKey=null;
+ function discardReport(){
+  state.status="idle";
+  state.startTs=null;
+  state.elapsedBefore=0;
+  state.lastElapsedMs=0;
+  state.startDateKey=null;
 
-    state.softWarned = false;
-    state.softDeadlineTs = 0;
+  state.softWarned = false;
+  state.softDeadlineTs = 0;
 
-    saveState();
-    setReportVisible(false);
-    clearSubmitMessages();
-    updateUI();
-    
-    if(el.draftHint) el.draftHint.style.display="none";
-  }
+  saveState();
+  setReportVisible(false);
+  clearSubmitMessages();
+  updateUI();
+
+  activeQuest = null;
+  questStartTime = null;
+  questEndTime = null;
+  questDurationMs = 0;
+  questFinished = false;
+
+  resetNotificationFlags();
+}
 
   function submitReport(){
     clearSubmitMessages();
@@ -6109,6 +6154,20 @@ on(el.notes, "input", saveReportDraft);
 
 document.addEventListener("visibilitychange", ()=>{
   if(!document.hidden){
+
+    if(state.status === "running" && state.cutEnabled && state.cutMinutes){
+
+      const ms = computeElapsedMs();
+      const targetMs = state.cutMinutes * 60000;
+
+      if(ms >= targetMs && !questFinished){
+        questFinished = true;
+        stopQuest();
+        return;
+      }
+
+    }
+
     syncGateRuntimeFromCfg();
     gateMaybeLock();
     gateCheckFirstQuestQualify();
@@ -6116,6 +6175,7 @@ document.addEventListener("visibilitychange", ()=>{
     renderGateUX();
     rqTickUI();
     renderGatePageUI();
+
   }
 });
 
@@ -6441,6 +6501,120 @@ document.querySelectorAll(".questTab").forEach(btn=>{
     scrollToId("sec-timer");
   });
 });
+
+/* =========================================
+   NOTIFICATION SYSTEM v0.8
+========================================= */
+
+function canUseNotification(){
+  return ("Notification" in window)
+}
+
+async function ensureNotificationPermission(){
+  if(!canUseNotification()) return "unsupported"
+
+  if(Notification.permission === "granted") return "granted"
+  if(Notification.permission === "denied") return "denied"
+
+  try{
+    const result = await Notification.requestPermission()
+    return result
+  }catch(err){
+    console.error("Notification permission error:", err)
+    return "error"
+  }
+}
+
+function getQuestCategoryEmoji(cat){
+  const key = String(cat || "").toLowerCase().trim()
+
+  if(key === "learning") return "📚"
+  if(key === "work/project") return "💼"
+  if(key === "physical") return "💪"
+  if(key === "connection") return "🤝"
+
+  return "✅"
+}
+
+function buildNotificationTitle(){
+  if(!activeQuest) return "SakuraQ"
+  const emoji = getQuestCategoryEmoji(activeQuest.category)
+  return `${emoji} ${activeQuest.name || "Quest"}`
+}
+
+function buildNotificationBody(){
+  return "ครบเวลาแล้ว\nเปิด SakuraQ เพื่อส่ง Report"
+}
+
+function shouldUseSystemNotification(){
+  if(document.visibilityState === "visible") return false
+  if(!("Notification" in window)) return false
+  if(Notification.permission !== "granted") return false
+  return true
+}
+
+function sendQuestDoneNotification(){
+  if(notified) return
+  if(!shouldUseSystemNotification()) return
+
+  try{
+    const n = new Notification(buildNotificationTitle(), {
+      body: buildNotificationBody(),
+      icon: "icon-192.png", // ถ้ายังไม่มี icon ก็ปล่อยไว้ก่อนได้
+      tag: "sakuraq-quest-done",
+      renotify: false
+    })
+
+    n.onclick = () => {
+      window.focus()
+      try{
+        switchPage("appPage")
+        scrollToId("sec-report")
+      }catch(err){
+        console.warn("Cannot jump to report:", err)
+      }
+      n.close()
+    }
+
+    notified = true
+  }catch(err){
+    console.error("Notification send error:", err)
+  }
+}
+
+function sendSmartWarningNotification(){
+  if(notificationMode !== "smart") return
+  if(smartWarnSent) return
+  if(!activeQuest) return
+  if(document.visibilityState === "visible") return
+  if(!("Notification" in window)) return
+  if(Notification.permission !== "granted") return
+
+  try{
+    const emoji = getQuestCategoryEmoji(activeQuest.category)
+
+    const n = new Notification(`${emoji} ${activeQuest.name || "Quest"}`, {
+      body: "เหลืออีก 1 นาที",
+      icon: "icon-192.png",
+      tag: "sakuraq-quest-smart-warning",
+      renotify: false
+    })
+
+    smartWarnSent = true
+
+    n.onclick = () => {
+      window.focus()
+      n.close()
+    }
+  }catch(err){
+    console.error("Smart warning notification error:", err)
+  }
+}
+
+function resetNotificationFlags(){
+  notified = false
+  smartWarnSent = false
+}
   /* =========================
     BOOT
   ========================= */
