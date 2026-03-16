@@ -2759,7 +2759,7 @@ linear-gradient(
                   <div class="brandMeta">
                     <div class="brandTitleRow">
                       <h1>SakuraQ</h1>
-                      <span class="versionBadge">v0.8.1A</span>
+                      <span class="versionBadge">v0.8.1B</span>
                     </div>
                     <div class="sub" id="todayText">Today: ----</div>
                   </div>
@@ -6664,6 +6664,9 @@ async function registerSW(){
     console.error("SW register failed:", err);
   }
 }
+
+/* NOTIFICATION sound */
+
 function playQuestDoneSound(){
   if(!notificationSound) return;
 
@@ -6672,44 +6675,33 @@ function playQuestDoneSound(){
     if(!AudioCtx) return;
 
     const ctx = new AudioCtx();
-
     const master = ctx.createGain();
-    master.gain.setValueAtTime(0.22, ctx.currentTime); // เพิ่มความดังรวม
+    master.gain.setValueAtTime(0.18, ctx.currentTime);
     master.connect(ctx.destination);
 
-    // note 1
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
+    const notes = [
+      { freq: 523.25, start: 0.00, dur: 0.12 }, // C5
+      { freq: 659.25, start: 0.10, dur: 0.12 }, // E5
+      { freq: 783.99, start: 0.20, dur: 0.16 }  // G5
+    ];
 
-    osc1.type = "sine";
-    osc1.frequency.setValueAtTime(880, ctx.currentTime);
+    notes.forEach(note => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-    gain1.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain1.gain.exponentialRampToValueAtTime(0.28, ctx.currentTime + 0.01);
-    gain1.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.start);
 
-    osc1.connect(gain1);
-    gain1.connect(master);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime + note.start);
+      gain.gain.exponentialRampToValueAtTime(0.20, ctx.currentTime + note.start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + note.start + note.dur);
 
-    // note 2
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(master);
 
-    osc2.type = "sine";
-    osc2.frequency.setValueAtTime(1320, ctx.currentTime + 0.12);
-
-    gain2.gain.setValueAtTime(0.0001, ctx.currentTime + 0.12);
-    gain2.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.14);
-    gain2.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.34);
-
-    osc2.connect(gain2);
-    gain2.connect(master);
-
-    osc1.start(ctx.currentTime);
-    osc1.stop(ctx.currentTime + 0.2);
-
-    osc2.start(ctx.currentTime + 0.12);
-    osc2.stop(ctx.currentTime + 0.36);
+      osc.start(ctx.currentTime + note.start);
+      osc.stop(ctx.currentTime + note.start + note.dur + 0.02);
+    });
 
   }catch(err){
     console.error("Sound error:", err);
