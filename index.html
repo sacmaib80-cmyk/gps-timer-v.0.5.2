@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>SakuraQ v0.8.2</title>
+    <title>SakuraQ v0.9.0</title>
 
     <style>
       :root{
@@ -2586,230 +2586,494 @@ linear-gradient(
   padding-bottom: 20px;
 }
 
-/* =========================
-   HISTORY PAGE v1
-========================= */
-
-.historyHero{
-  padding: 16px;
-}
-
-.historyHeroTop{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
-  flex-wrap:wrap;
-}
-
-.historyTitle{
-  font-size:18px;
-  font-weight:900;
-  color:var(--ink);
-}
-
-.historySub{
-  margin-top:4px;
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.45;
-}
-
-.historyRangeTabs{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-.rangeTab{
-  border:0;
-  border-radius:999px;
-  padding:8px 12px;
-  font-size:12px;
-  font-weight:800;
-  background:rgba(255,255,255,.7);
-  color:var(--muted);
-  box-shadow:none;
-}
-
-.rangeTab.active{
-  background:rgba(255,255,255,.95);
-  color:var(--ink);
-  box-shadow:0 4px 12px rgba(15,23,42,.06);
-}
-
-.historyOverviewGrid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.statCard{
-  padding:14px;
-}
-
-.statLabel{
-  font-size:11px;
-  color:var(--muted);
-  font-weight:700;
-}
-
-.statValue{
-  margin-top:6px;
-  font-size:22px;
-  font-weight:900;
-  color:var(--ink);
-}
-
-.historyBlockTitle{
-  font-size:13px;
-  font-weight:900;
-  color:var(--ink);
-  margin-bottom:10px;
-}
-
-.historyChartStub{
-  height:180px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:18px;
-  background:rgba(2,6,23,.03);
-  color:var(--muted);
-  font-size:13px;
-  font-weight:700;
-  border:1px dashed rgba(15,23,42,.10);
-}
-
-.historyBreakdownGrid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.breakdownCard{
-  padding:14px;
-}
-
-.breakLabel{
-  font-size:12px;
-  font-weight:800;
-  color:var(--muted);
-}
-
-.breakValue{
-  margin-top:6px;
-  font-size:20px;
-  font-weight:900;
-  color:var(--ink);
-}
-
-.breakMeta{
-  margin-top:6px;
-  font-size:11px;
-  color:var(--muted);
-  line-height:1.4;
-}
-
-.historySelectedDay{
-  font-size:18px;
-  font-weight:900;
-  color:var(--ink);
-}
-
-.historySelectedTotal{
-  margin-top:4px;
-  margin-bottom:12px;
-  color:var(--muted);
-  font-size:12px;
-}
-
-@media (max-width: 640px){
-  .historyOverviewGrid,
-  .historyBreakdownGrid{
-    grid-template-columns:1fr;
-  }
-
-  .historyHeroTop{
-    flex-direction:column;
-    align-items:stretch;
-  }
-
-  .historyRangeTabs{
-    width:100%;
-  }
-
-  .rangeTab{
-    flex:1;
-    text-align:center;
-  }
-}
-#historyPage{
-  padding: 14px 12px 90px;
+/* ═══════════════════════════════════════════════
+   HISTORY PAGE — redesigned  (history-redesign.css)
+   matches screenshot: cream bg, green chart, RPG stats
+═══════════════════════════════════════════════ */
+ 
+/* ── Google Font (Sarabun = Thai + Latin, clean & modern) ── */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800;900&display=swap');
+ 
+/* ── Page shell ── */
+#historyPage {
+  background: #f0ede6;          /* warm cream, same as screenshot */
+  min-height: 100vh;
+  padding: 0 0 100px;
+  font-family: 'Sarabun', sans-serif;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 }
-.historyDayTabs{
-  display:flex;
-  gap:8px;
-  overflow-x:auto;
-  padding-bottom:6px;
-  margin-bottom:12px;
-  -webkit-overflow-scrolling: touch;
+ 
+.hpContainer {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 14px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-
-.historyDayTab{
-  flex:0 0 auto;
-  border:0;
-  border-radius:999px;
-  padding:8px 12px;
-  font-size:12px;
-  font-weight:800;
-  background:rgba(255,255,255,.72);
-  color:var(--muted);
-  box-shadow:none;
-  white-space:nowrap;
-}
-
-.historyDayTab.active{
-  background:rgba(255,255,255,.96);
-  color:var(--ink);
-  box-shadow:0 4px 12px rgba(15,23,42,.06);
-}
-.notesItem{
-  padding:10px 12px;
-  border-radius:14px;
-  background:rgba(248,250,252,.7);
-  border:1px solid rgba(15,23,42,.06);
-}
-.historyDayTab.active{
-  background:linear-gradient(
-    180deg,
-    rgba(255,255,255,.98),
-    rgba(255,255,255,.88)
-  );
-  color:var(--ink);
+ 
+/* ═══════════════════════════════════════════
+   HERO CARD
+═══════════════════════════════════════════ */
+.hpHeroCard {
+  background: #fff;
+  border-radius: 28px;
+  padding: 16px 18px 14px;
   box-shadow:
-    0 6px 14px rgba(15,23,42,.08);
+    0 2px 0 rgba(0,0,0,.04),
+    0 8px 28px rgba(0,0,0,.07);
 }
-.historyChartStub{
-  height:220px;
-  display:block;
-  border-radius:18px;
-  background:rgba(2,6,23,.03);
-  border:1px dashed rgba(15,23,42,.10);
-  overflow:hidden;
-  padding:8px;
+ 
+/* top bar */
+.hpHeroTopBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
 }
-
-.historySvgChart{
-  width:100%;
-  height:100%;
-  display:block;
+ 
+.hpHeroLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-
-.overlay{
+ 
+.hpHeroIcon { font-size: 22px; }
+ 
+.hpHeroLabel {
+  font-size: 16px;
+  font-weight: 900;
+  color: #1a2e1a;
+  letter-spacing: -.3px;
+}
+ 
+.hpHeroCenter {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex: 1;
+}
+ 
+.hpHeroScore {
+  font-size: 36px;
+  font-weight: 900;
+  color: #111;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+ 
+.hpHeroBadge {
+  background: #2d9e56;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+ 
+.hpHeroBell {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+}
+ 
+/* sub row */
+.hpHeroSubRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #555;
+}
+.hpHeroSubRow b { color: #1a1a1a; font-weight: 800; }
+.hpHeroSubDivider { color: #bbb; }
+ 
+/* ── Chart ── */
+.hpChartWrap {
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(160deg, #e8f8ee 0%, #d3f0e0 50%, #c4ebda 100%);
+  margin-bottom: 12px;
+  min-height: 160px;
+  position: relative;
+}
+ 
+.hpChartSvg {
+  width: 100%;
+  height: 160px;
+  display: block;
+}
+ 
+/* watercolor blob texture */
+.hpChartArea {
+  filter: url(#chartFill);
+}
+ 
+/* ── Bottom meta ── */
+.hpHeroMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #444;
+  flex-wrap: wrap;
+}
+.hpHeroMeta b { font-weight: 800; color: #1a1a1a; }
+.hpMetaDivider { color: #ccc; }
+.hpDropBad { color: #e05555; }
+ 
+/* day pills */
+.hpDayPills {
+  display: flex;
+  gap: 4px;
+  margin-left: 4px;
+}
+.hpDayPill {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  padding: 2px 6px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.hpDayPill.active,
+.hpDayPill:hover {
+  background: #2d9e56;
+  color: #fff;
+}
+ 
+/* ═══════════════════════════════════════════
+   SECTION LABEL
+═══════════════════════════════════════════ */
+.hpSectionLabel {
+  font-size: 16px;
+  font-weight: 900;
+  color: #1a2e1a;
+  letter-spacing: -.2px;
+  padding: 2px 2px 0;
+}
+ 
+/* ═══════════════════════════════════════════
+   STATS ROW  (2 columns)
+═══════════════════════════════════════════ */
+.hpStatsRow {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+ 
+/* ── Stats card (left) ── */
+.hpStatsCard {
+  background: #fff;
+  border-radius: 24px;
+  padding: 16px 16px 12px;
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.03),
+    0 6px 20px rgba(0,0,0,.06);
+}
+ 
+.hpStatItem { padding: 6px 0; }
+ 
+.hpStatDivider {
+  height: 1px;
+  background: rgba(0,0,0,.06);
+  margin: 4px 0;
+}
+ 
+.hpStatHeader {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+ 
+.hpStatIcon { font-size: 18px; line-height: 1; }
+ 
+.hpStatName {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1a1a1a;
+  flex: 1;
+}
+ 
+.hpStatLevel {
+  font-size: 12px;
+  font-weight: 800;
+  color: #555;
+}
+ 
+.hpStatChevron {
+  font-size: 16px;
+  color: #aaa;
+  font-weight: 700;
+  margin-left: 2px;
+}
+ 
+/* progress bar */
+.hpBar {
+  height: 11px;
+  background: rgba(0,0,0,.07);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+ 
+.hpBarFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .45s cubic-bezier(.4,0,.2,1);
+}
+ 
+.hpBarGreen  { background: linear-gradient(90deg, #3db86b, #6fcf97); }
+.hpBarYellow { background: linear-gradient(90deg, #f0b432, #f5d06e); }
+.hpBarGray   { background: rgba(0,0,0,.18); }
+ 
+.hpStatFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.hpStatMeta  { font-size: 10px; color: #aaa; }
+.hpStatScore { font-size: 11px; font-weight: 700; color: #666; }
+ 
+/* ── Insight card (right) ── */
+.hpInsightCard {
+  background: #fff;
+  border-radius: 24px;
+  padding: 14px 14px 12px;
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.03),
+    0 6px 20px rgba(0,0,0,.06);
+}
+ 
+.hpInsightTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+ 
+.hpInsightTitle {
+  font-size: 15px;
+  font-weight: 900;
+  color: #1a2e1a;
+}
+ 
+.hpMascot {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#c8efd4,#a0dbb8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.hpMascotImg { width: 36px; height: 36px; }
+ 
+.hpInsightList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hpInsightList li {
+  font-size: 11.5px;
+  color: #444;
+  line-height: 1.45;
+  padding-left: 14px;
+  position: relative;
+}
+.hpInsightList li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #3db86b;
+  font-weight: 900;
+}
+ 
+/* ═══════════════════════════════════════════
+   MINI GRID  (4-col overview)
+═══════════════════════════════════════════ */
+.hpMiniGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+ 
+.hpMiniCard {
+  background: #fff;
+  border-radius: 20px;
+  padding: 14px 14px 12px;
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.03),
+    0 4px 14px rgba(0,0,0,.05);
+}
+ 
+.hpMiniLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #999;
+  margin-bottom: 6px;
+}
+ 
+.hpMiniValue {
+  font-size: 22px;
+  font-weight: 900;
+  color: #1a1a1a;
+  letter-spacing: -.5px;
+}
+ 
+/* ═══════════════════════════════════════════
+   QUEST CARD
+═══════════════════════════════════════════ */
+.hpQuestCard {
+  background: #fff;
+  border-radius: 24px;
+  padding: 14px 14px 10px;
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.03),
+    0 6px 20px rgba(0,0,0,.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+ 
+.hpQuestItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.hpQuestItem:last-child { border-bottom: none; }
+ 
+.hpQuestItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+ 
+.hpQuestIcon { font-size: 22px; }
+ 
+.hpQuestName {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+ 
+.hpQuestBadge {
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 2px 10px;
+  display: inline-block;
+}
+ 
+.hpBadgeGreen {
+  background: #2d9e56;
+  color: #fff;
+}
+ 
+.hpBadgeYellow {
+  background: #f0b432;
+  color: #fff;
+}
+ 
+.hpQuestRight {
+  text-align: right;
+}
+ 
+.hpQuestXp {
+  font-size: 15px;
+  font-weight: 900;
+  color: #2d9e56;
+}
+.hpXpSmall { font-size: 13px; }
+ 
+.hpQuestTime {
+  font-size: 11px;
+  color: #999;
+  margin-top: 2px;
+}
+ 
+/* ═══════════════════════════════════════════
+   NOTES CARD
+═══════════════════════════════════════════ */
+.hpNotesCard {
+  background: #fff;
+  border-radius: 20px;
+  padding: 14px;
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.03),
+    0 6px 20px rgba(0,0,0,.06);
+  min-height: 60px;
+}
+ 
+.hpHint {
+  font-size: 13px;
+  color: #bbb;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px 0;
+}
+ 
+/* ── Notes feed items (populated by JS) ── */
+.notesItem {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(248,250,252,.9);
+  border: 1px solid rgba(0,0,0,.06);
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #333;
+}
+ 
+/* ═══════════════════════════════════════════
+   RANGE TABS  (kept for JS compatibility)
+═══════════════════════════════════════════ */
+.historyRangeTabs {
+  display: flex;
+  gap: 6px;
+}
+ 
+.rangeTab {
+  border: none;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(0,0,0,.06);
+  color: #888;
+  cursor: pointer;
+  font-family: 'Sarabun', sans-serif;
+  transition: background .15s, color .15s;
+}
+ 
+.rangeTab.active {
+  background: #fff;
+  color: #1a1a1a;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+ 
+/* ═══════════════════════════════════════════
+   OVERLAY (kept from original)
+═══════════════════════════════════════════ */
+.overlay {
   position: fixed;
   inset: 0;
   display: none;
@@ -2817,11 +3081,117 @@ linear-gradient(
   justify-content: center;
   z-index: 9999;
 }
-
-.overlay.show{
-  display: flex;
+.overlay.show { display: flex; }
+ 
+/* ═══════════════════════════════════════════
+   MOBILE ADJUSTMENTS
+═══════════════════════════════════════════ */
+@media (max-width: 380px) {
+  .hpStatsRow {
+    grid-template-columns: 1fr;
+  }
+  .hpMiniGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .hpHeroScore { font-size: 30px; }
+}
+/* ชั่วคราว: ตัด insight ออก ให้ section กลับเป็นคอลัมน์เดียว */
+.hpStatsRow{
+  grid-template-columns: 1fr;
+}
+.hpStatsCard,
+.hpQuestCard{
+  max-width: 100%;
+}
+/* HERO RANGE TABS — ใช้แทนพวก พฤ ศ ... */
+.hpRangeTabs{
+  display:grid !important;
+  grid-template-columns:repeat(5, 1fr);
+  gap:8px;
+  margin-top:10px;
 }
 
+.hpRangeTabs .rangeTab{
+  border:none;
+  border-radius:999px;
+  padding:9px 8px;
+  font-size:12px;
+  font-weight:800;
+  text-align:center;
+  background:rgba(255,255,255,.9);
+  color:#6b7280;
+  box-shadow:0 3px 10px rgba(0,0,0,.05);
+}
+
+.hpRangeTabs .rangeTab.active{
+  background:#2d9e56;
+  color:#fff;
+  box-shadow:0 6px 16px rgba(45,158,86,.22);
+}
+/* ===== DAY TABS — clean pretty version ===== */
+
+.historyDayTabsWrap{
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.historyDayTabsWrap::-webkit-scrollbar{
+  display: none;
+}
+
+.historyDayTabs,
+#histDayTabs{
+  display: inline-flex !important;
+  flex-wrap: nowrap !important;
+  gap: 8px;
+  width: max-content !important;
+  min-width: 100%;
+  white-space: nowrap;
+  padding: 4px 0 8px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.historyDayTabs::-webkit-scrollbar,
+#histDayTabs::-webkit-scrollbar{
+  display: none;
+}
+
+.historyDayTab,
+#histDayTabs .historyDayTab{
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: max-content;
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 8px 14px;
+}
+
+.historyDayTab.active{
+  scroll-margin-left: 12px;
+}
+
+/* กัน parent ดัน layout */
+.hpQuestCard,
+.historyQuestDetailCard,
+.card{
+  min-width: 0;
+}
+.hpDropBad{
+  color:#e05555;
+}
+
+.hpDropGood{
+  color:#2d9e56;
+}
+
+.hpDropNeutral{
+  color:#888;
+}
 </style>
 </head>
 <body>
@@ -2931,13 +3301,13 @@ linear-gradient(
               <div class="brandBlock">
                 <div class="brandLeft">
                   <div class="appIcon">
-                    <img src="logo.png" alt="QPS logo">
+                    <img src="logo.png" alt="EXP logo">
                   </div>
 
                   <div class="brandMeta">
                     <div class="brandTitleRow">
                       <h1>SakuraQ</h1>
-                      <span class="versionBadge">v0.8.2</span>
+                      <span class="versionBadge">v0.9.0</span>
                     </div>
                     <div class="sub" id="todayText">Today: ----</div>
                   </div>
@@ -3182,184 +3552,231 @@ linear-gradient(
     </div>
 
 
-    <!-- HISTORY PAGE -->
-   <section id="historyPage" class="app page">
-  <div class="container">
+<!-- HISTORY PAGE — redesigned to match screenshot -->
+<section id="historyPage" class="app page">
+  <div class="hpContainer">
 
-    <div class="section">
-      <div class="sectionHead">
-        <h2>📈 History</h2>
+    <!-- ══════════════════════════════════════
+         HERO CARD  (QPS + chart)
+    ══════════════════════════════════════ -->
+    <div class="hpHeroCard">
+
+      <!-- top bar -->
+      <div class="hpHeroTopBar">
+        <div class="hpHeroLeft">
+          <span class="hpHeroIcon">🏠</span>
+          <span class="hpHeroLabel">Total</span>
+        </div>
+        <div class="hpHeroCenter">
+          <span class="hpHeroScore" id="histTotalQps">284</span>
+          <span class="hpHeroBadge" id="histTodayBadge">+0 วันนี้</span>
+        </div>
+        <button class="hpHeroBell" type="button">🔔</button>
       </div>
 
-      <div class="card historyHero">
-        <div class="historyHeroTop">
-          <div>
-            <div class="historyTitle">Growth History</div>
-            <div class="historySub">ดูคะแนน การเติบโต หมวดเด่น และโน้ตย้อนหลัง</div>
+      <!-- sub stats -->
+      <div class="hpHeroSubRow">
+        <span class="hpHeroSub">🔥 ติด <b id="histCurrentStreak">12</b> วัน</span>
+        <span class="hpHeroSubDivider">/</span>
+        <span class="hpHeroSub">📈 Avg <b id="histAvgDay">40.6</b></span>
+      </div>
+
+      <!-- chart area -->
+      <div class="hpChartWrap" id="histTrendChart">
+        <!-- JS will inject SVG here; fallback watercolor placeholder shown via CSS -->
+        <svg class="hpChartSvg" viewBox="0 0 340 160" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6fcf97" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#a8e6c0" stop-opacity="0.08"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- fill area -->
+          <path class="hpChartArea"
+            d="M10,140 C30,138 50,130 70,118 C90,106 110,108 130,96
+               C150,84 165,72 185,58 C205,44 220,42 240,34
+               C260,26 285,18 330,8
+               L330,160 L10,160 Z"
+            fill="url(#chartFill)"/>
+
+          <!-- line -->
+          <path class="hpChartLine"
+            d="M10,140 C30,138 50,130 70,118 C90,106 110,108 130,96
+               C150,84 165,72 185,58 C205,44 220,42 240,34
+               C260,26 285,18 330,8"
+            fill="none" stroke="#3db86b" stroke-width="2.8"
+            stroke-linecap="round" stroke-linejoin="round"
+            filter="url(#glow)"/>
+
+          <!-- dots -->
+          <circle cx="10"  cy="140" r="4.5" fill="#fff" stroke="#3db86b" stroke-width="2"/>
+          <circle cx="70"  cy="118" r="4.5" fill="#fff" stroke="#3db86b" stroke-width="2"/>
+          <circle cx="130" cy="96"  r="4.5" fill="#fff" stroke="#3db86b" stroke-width="2"/>
+          <circle cx="185" cy="58"  r="4.5" fill="#fff" stroke="#3db86b" stroke-width="2"/>
+          <circle cx="240" cy="34"  r="4.5" fill="#fff" stroke="#3db86b" stroke-width="2"/>
+          <circle cx="330" cy="8"   r="5.5" fill="#fff" stroke="#3db86b" stroke-width="2.5"/>
+
+          <!-- today flag -->
+          <rect x="326" y="2" width="52" height="22" rx="6" fill="#3db86b"/>
+          <text x="352" y="17" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="'Sarabun', sans-serif">Today!</text>
+        </svg>
+      </div>
+
+      <!-- bottom meta -->
+      <div class="hpHeroMeta">
+        <span>🔥 Best: <b id="histBestDay">84</b></span>
+        <span class="hpMetaDivider">/</span>
+       <span>📈 Change <b id="histChangeValue">--</b></span>
+        <span class="hpMetaDivider">/</span>
+    <div class="historyRangeTabs hpRangeTabs">
+ <button class="rangeTab" data-range="2d" type="button">2D</button>
+<button class="rangeTab active" data-range="3d" type="button">3D</button>
+<button class="rangeTab" data-range="7d" type="button">7D</button>
+<button class="rangeTab" data-range="30d" type="button">30D</button>
+<button class="rangeTab" data-range="all" type="button">All</button>
+</div>
+    </div>
+     </div>
+
+    <!-- ══════════════════════════════════════
+         ROW: YOUR STATS  +  INSIGHT
+    ══════════════════════════════════════ -->
+    <div class="hpSectionLabel">Your Stats</div>
+
+    <div class="hpStatsRow">
+
+      <!-- LEFT — stat card -->
+      <div class="hpStatsCard">
+
+       <div class="hpStatsCard">
+  <div id="histCategoryStats"></div>
+</div>
+
+      </div><!-- /hpStatsCard -->
+
+  
+  
+    </div><!-- /hpStatsRow -->
+
+    <!-- ══════════════════════════════════════
+         OVERVIEW STATS  (4 mini cards)
+    ══════════════════════════════════════ -->
+    <div class="hpMiniGrid">
+      <div class="hpMiniCard">
+        <div class="hpMiniLabel">Productive Days</div>
+        <div class="hpMiniValue" id="histProductiveDays">--</div>
+      </div>
+      <div class="hpMiniCard">
+        <div class="hpMiniLabel">Dead Days</div>
+        <div class="hpMiniValue" id="histDeadDays">--</div>
+      </div>
+      <div class="hpMiniCard">
+        <div class="hpMiniLabel">Best Streak</div>
+        <div class="hpMiniValue" id="histBestStreak">--</div>
+      </div>
+      <div class="hpMiniCard">
+        <div class="hpMiniLabel">Consistency</div>
+        <div class="hpMiniValue" id="histConsistency">0%</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         DAY DETAIL + QUEST LOG
+    ══════════════════════════════════════ -->
+    <div class="hpSectionLabel">Today's Quests</div>
+
+    <div class="hpStatsRow">
+
+      
+      <!-- Quest Log -->
+      <div class="hpQuestCard">
+
+<div class="historyDayTabsWrap">
+  <div class="historyDayTabs" id="histDayTabs"></div>
+</div>
+
+        <div class="list" id="histQuestLog">
+          <!-- JS populates; sample skeleton below so design is visible -->
+          <div class="hpQuestItem">
+            <div class="hpQuestItemLeft">
+              <span class="hpQuestIcon">📚</span>
+              <div>
+                <div class="hpQuestName">English</div>
+                <div class="hpQuestBadge hpBadgeGreen">Good Focus</div>
+              </div>
+            </div>
+            <div class="hpQuestRight">
+              <div class="hpQuestXp">+8 XP</div>
+              <div class="hpQuestTime">20:00 / 02:27</div>
+            </div>
           </div>
 
-          <div class="historyRangeTabs">
-            <button class="rangeTab active" data-range="3d">3D</button>
-            <button class="rangeTab" data-range="7d">7D</button>
-            <button class="rangeTab" data-range="30d">30D</button>
-            <button class="rangeTab" data-range="all">All</button>
+          <div class="hpQuestItem">
+            <div class="hpQuestItemLeft">
+              <span class="hpQuestIcon">💪</span>
+              <div>
+                <div class="hpQuestName">ขา</div>
+                <div class="hpQuestBadge hpBadgeYellow">Low Effort</div>
+              </div>
+            </div>
+            <div class="hpQuestRight">
+              <div class="hpQuestXp hpXpSmall">+5.6 XP</div>
+              <div class="hpQuestTime">14:00</div>
+            </div>
           </div>
         </div>
       </div>
+
+
+
     </div>
 
-    <!-- 1) OVERVIEW -->
-    <div class="section">
-      <div class="sectionHead">
-        <h2>Overview</h2>
-      </div>
-
-      <div class="historyOverviewGrid">
-        <div class="card statCard">
-          <div class="statLabel">Total QPS</div>
-          <div class="statValue" id="histTotalQps">--</div>
-        </div>
-
-        <div class="card statCard">
-          <div class="statLabel">Avg / Day</div>
-          <div class="statValue" id="histAvgDay">--</div>
-        </div>
-
-        <div class="card statCard">
-          <div class="statLabel">Best Day</div>
-          <div class="statValue" id="histBestDay">--</div>
-        </div>
-
-        <div class="card statCard">
-          <div class="statLabel">Current Streak</div>
-          <div class="statValue" id="histCurrentStreak">--</div>
-        </div>
+    <!-- ══════════════════════════════════════
+         NOTES FEED
+    ══════════════════════════════════════ -->
+    <div class="hpSectionLabel">Quest Notes</div>
+    <div class="hpNotesCard">
+      <div class="list" id="histNotesFeed">
+        <div class="hpHint">ยังไม่มีโน้ต</div>
       </div>
     </div>
 
-    <!-- 2) TREND -->
-    <div class="section">
-      <div class="sectionHead">
-        <h2>Trend</h2>
+    <!-- ══════════════════════════════════════
+         ANALYTICS MINI GRID
+    ══════════════════════════════════════ -->
+    <div class="hpSectionLabel">Analytics</div>
+    <div class="hpMiniGrid">
+      <div class="hpMiniCard">
+        <div class="hpMiniLabel">Total Quests</div>
+        <div class="hpMiniValue" id="histTotalQuests">0</div>
       </div>
-
-      <div class="card">
-        <div class="historyBlockTitle">growth curve</div>
-        <div class="historyChartStub" id="histTrendChart">
-          Chart coming soon
-        </div>
+      <div class="hpMiniCard">
+        <div class="hpMiniLabel">Most Used</div>
+        <div class="hpMiniValue" id="histMostUsedCategory">--</div>
       </div>
-    </div>
-
-    <!-- 3) CATEGORY BREAKDOWN -->
-    <div class="section">
-      <div class="sectionHead">
-        <h2>Category Breakdown</h2>
+      <div class="hpMiniCard">
+        <div class="hpMiniLabel">Avg Session</div>
+        <div class="hpMiniValue" id="histAvgSession">0 min</div>
       </div>
-
-      <div class="historyBreakdownGrid">
-        <div class="card breakdownCard">
-          <div class="breakLabel">Learning</div>
-          <div class="breakValue" id="histLearningScore">--</div>
-          <div class="breakMeta" id="histLearningMeta">--</div>
-        </div>
-
-        <div class="card breakdownCard">
-          <div class="breakLabel">Work/Project</div>
-          <div class="breakValue" id="histWorkScore">--</div>
-          <div class="breakMeta" id="histWorkMeta">--</div>
-        </div>
-
-        <div class="card breakdownCard">
-          <div class="breakLabel">Physical</div>
-          <div class="breakValue" id="histPhysicalScore">--</div>
-          <div class="breakMeta" id="histPhysicalMeta">--</div>
-        </div>
-
-        <div class="card breakdownCard">
-          <div class="breakLabel">Connection</div>
-          <div class="breakValue" id="histConnectionScore">--</div>
-          <div class="breakMeta" id="histConnectionMeta">--</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4) DAY DETAIL / QUEST LOG -->
-<div class="section">
-  <div class="sectionHead">
-    <h2>Day Detail</h2>
-  </div>
-
-  <div class="card">
-    <div class="historyBlockTitle">Selected Day</div>
-
-    <div class="historyDayTabs" id="histDayTabs"></div>
-
-    <div class="historySelectedDay" id="histSelectedDay">--</div>
-    <div class="historySelectedTotal" id="histSelectedTotal">Total: --</div>
-
-    <div class="list" id="histQuestLog">
-      <div class="hint">ยังไม่มีข้อมูล</div>
-    </div>
-  </div>
+    <div class="hpMiniCard">
+  <div class="hpMiniLabel">Selected Day</div>
+  <div class="hpMiniValue" id="histSelectedDayMini">--</div>
 </div>
-
-    <!-- 5) QUEST NOTES -->
-    <div class="section">
-      <div class="sectionHead">
-        <h2>Quest Notes</h2>
-      </div>
-
-      <div class="card">
-        <div class="historyBlockTitle">Notes Feed</div>
-        <div class="list" id="histNotesFeed">
-          <div class="hint">ยังไม่มีโน้ต</div>
-        </div>
-      </div>
     </div>
 
-<div class="card statCard">
-  <div class="statLabel">Productive Days</div>
-  <div class="statValue" id="histProductiveDays">--</div>
-</div>
+    <!-- hidden elements JS might still reference -->
+    <span id="histSelectedTotal" style="display:none"></span>
+    <span id="histWorkLevel"     style="display:none">1</span>
+    <div  id="histWorkBar"       style="display:none"></div>
+    <span id="histWorkMeta"      style="display:none"></span>
+    <span id="histWorkScore"     style="display:none"></span>
 
-<div class="card statCard">
-  <div class="statLabel">Dead Days</div>
-  <div class="statValue" id="histDeadDays">--</div>
-</div>
-
-<div class="card statCard">
-  <div class="statLabel">Best Streak</div>
-  <div class="statValue" id="histBestStreak">--</div>
-</div>
-
-  </div>
-
-  <section class="historySection">
-  <div class="sectionLabel">Analytics</div>
-
-  <div class="historyMiniGrid">
-    <div class="miniStatCard">
-      <div class="miniStatLabel">Total Quests</div>
-      <div class="miniStatValue" id="histTotalQuests">0</div>
-    </div>
-
-    <div class="miniStatCard">
-      <div class="miniStatLabel">Most Used</div>
-      <div class="miniStatValue" id="histMostUsedCategory">--</div>
-    </div>
-
-    <div class="miniStatCard">
-      <div class="miniStatLabel">Avg Session</div>
-      <div class="miniStatValue" id="histAvgSession">0 min</div>
-    </div>
-
-    <div class="miniStatCard">
-      <div class="miniStatLabel">Consistency</div>
-      <div class="miniStatValue" id="histConsistency">0%</div>
-    </div>
-  </div>
-</section>
+  </div><!-- /hpContainer -->
 </section>
 
     <!-- ONBOARDING -->
@@ -7230,6 +7647,7 @@ function getHistoryDaysByRange(range){
   if(range === "all") return allDays;
 
   const map = {
+    "2d": 2,
     "3d": 3,
     "7d": 7,
     "30d": 30
@@ -7404,6 +7822,9 @@ if(el.histBestStreak) el.histBestStreak.textContent = String(extra.bestStreak);
 
   renderHistoryTrendChart();
   renderHistoryAnalytics();
+  renderHistoryCategoryStats();
+  renderHistoryTodayBadge();
+  renderHistoryChange();
 
   // Day detail
   if(el.histSelectedDay) el.histSelectedDay.textContent = historySelectedDay;
@@ -7919,6 +8340,218 @@ function renderHistoryAnalytics(){
 
   if(el.histConsistency){
     el.histConsistency.textContent = `${analytics.consistency.score}%`;
+  }
+}
+/* =========================
+   HISTORY CATEGORY RPG STATS
+   1000 minutes = 1 level
+========================= */
+
+const HISTORY_CATEGORY_CONFIG = {
+  "Learning": {
+    key: "Learning",
+    label: "Learning",
+    icon: "📚",
+    barClass: "hpBarGreen"
+  },
+  "Work/Project": {
+    key: "Work/Project",
+    label: "Work/Project",
+    icon: "🛠️",
+    barClass: "hpBarGreen"
+  },
+  "Physical": {
+    key: "Physical",
+    label: "Physical",
+    icon: "💪",
+    barClass: "hpBarYellow"
+  },
+  "Connection": {
+    key: "Connection",
+    label: "Connection",
+    icon: "💬",
+    barClass: "hpBarGray"
+  }
+};
+
+function getCategoryMinutesByRange(range){
+  const days = getHistoryDaysByRange(range);
+  const data = loadAll();
+
+  const totals = {
+    "Learning": 0,
+    "Work/Project": 0,
+    "Physical": 0,
+    "Connection": 0
+  };
+
+  days.forEach(dayKey => {
+    const day = data[dayKey];
+    if(!day || !Array.isArray(day.quests)) return;
+
+    day.quests.forEach(raw => {
+      const cat = formatCategoryName(raw.category);
+      const minutes = getQuestMinutes(raw);
+
+      if(totals[cat] != null){
+        totals[cat] += Number(minutes || 0);
+      }
+    });
+  });
+
+  return totals;
+}
+
+function getCategoryLevelData(totalMinutes){
+  const safeMinutes = Math.max(0, Number(totalMinutes || 0));
+  const level = Math.floor(safeMinutes / 1000) + 1;
+  const currentLevelMinutes = safeMinutes % 1000;
+  const nextTarget = 1000;
+  const progressPercent = Math.max(0, Math.min(100, (currentLevelMinutes / nextTarget) * 100));
+
+  return {
+    totalMinutes: safeMinutes,
+    level,
+    currentLevelMinutes,
+    nextTarget,
+    progressPercent: round1(progressPercent)
+  };
+}
+
+function getHistoryCategoryRpgStats(range){
+  const totals = getCategoryMinutesByRange(range);
+
+  return Object.keys(HISTORY_CATEGORY_CONFIG).map(cat => {
+    const cfg = HISTORY_CATEGORY_CONFIG[cat];
+    const levelData = getCategoryLevelData(totals[cat] || 0);
+
+    return {
+      ...cfg,
+      ...levelData
+    };
+  }).sort((a, b) => b.totalMinutes - a.totalMinutes);
+}
+
+function formatMinutesCompact(n){
+  return Number(n || 0).toLocaleString();
+}
+
+function renderHistoryCategoryStats(){
+  const mount = document.getElementById("histCategoryStats");
+  if(!mount) return;
+
+  const items = getHistoryCategoryRpgStats(historyRange);
+
+  mount.innerHTML = items.map(item => `
+    <div class="hpStatItem">
+      <div class="hpStatHeader">
+        <span class="hpStatIcon">${item.icon}</span>
+        <span class="hpStatName">${escapeHtml(item.label)}</span>
+        <span class="hpStatLevel">Lv.${item.level}</span>
+        <span class="hpStatChevron">›</span>
+      </div>
+
+      <div class="hpBar">
+        <div
+          class="hpBarFill ${item.barClass}"
+          style="width:${item.progressPercent}%"
+        ></div>
+      </div>
+
+      <div class="hpStatFooter">
+        <span class="hpStatMeta">
+          ${formatMinutesCompact(item.currentLevelMinutes)} / ${formatMinutesCompact(item.nextTarget)} min
+        </span>
+        <span class="hpStatScore">
+          ${formatMinutesCompact(item.totalMinutes)} min
+        </span>
+      </div>
+    </div>
+  `).join('<div class="hpStatDivider"></div>');
+}
+function getHistoryTodayScore(){
+  const todayKey = localDateKey();
+  const data = loadAll();
+  const today = data[todayKey];
+  return Number(today?.totalQps || 0);
+}
+
+
+function renderHistoryTodayBadge(){
+  const badge = document.getElementById("histTodayBadge");
+  if(!badge) return;
+
+  const todayScore = getHistoryTodayScore();
+
+  if(todayScore <= 0){
+    badge.textContent = `ยังไม่เริ่มวันนี้`;
+    return;
+  }
+
+  badge.textContent = `+${round1(todayScore)} วันนี้`;
+}
+
+function getHistoryChangeData(range){
+  const data = loadAll();
+  const todayKey = localDateKey();
+  const todayScore = Number(data[todayKey]?.totalQps || 0);
+
+  // 2D = เทียบเมื่อวานตรงๆ
+  if(range === "2d"){
+    const yesterdayKey = addDays(todayKey, -1);
+    const yesterdayScore = Number(data[yesterdayKey]?.totalQps || 0);
+
+    if(yesterdayScore === 0){
+      if(todayScore === 0){
+        return { label: "--", trend: "neutral" };
+      }
+      return { label: "New", trend: "up" };
+    }
+
+    const pct = ((todayScore - yesterdayScore) / yesterdayScore) * 100;
+    const rounded = Math.round(pct);
+
+    return {
+      label: rounded === 0 ? "Same" : `${rounded > 0 ? "+" : ""}${rounded}%`,
+      trend: rounded < 0 ? "down" : rounded > 0 ? "up" : "neutral"
+    };
+  }
+
+  // 3D / 7D / 30D / ALL = วันนี้เทียบกับค่าเฉลี่ยของช่วงที่เลือก
+  const days = getHistoryDaysByRange(range);
+  const scores = days.map(dayKey => Number(data[dayKey]?.totalQps || 0));
+  const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+
+  if(avg === 0){
+    if(todayScore === 0){
+      return { label: "--", trend: "neutral" };
+    }
+    return { label: "New", trend: "up" };
+  }
+
+  const pct = ((todayScore - avg) / avg) * 100;
+  const rounded = Math.round(pct);
+
+  return {
+    label: rounded === 0 ? "Same" : `${rounded > 0 ? "+" : ""}${rounded}%`,
+    trend: rounded < 0 ? "down" : rounded > 0 ? "up" : "neutral"
+  };
+}
+function renderHistoryChange(){
+  const el = document.getElementById("histChangeValue");
+  if(!el) return;
+
+  const change = getHistoryChangeData(historyRange);
+  el.textContent = change.label;
+
+  el.classList.remove("hpDropBad", "hpDropGood", "hpDropNeutral");
+
+  if(change.trend === "down"){
+    el.classList.add("hpDropBad");
+  }else if(change.trend === "up"){
+    el.classList.add("hpDropGood");
+  }else{
+    el.classList.add("hpDropNeutral");
   }
 }
 
