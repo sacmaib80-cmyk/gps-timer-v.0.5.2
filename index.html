@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>SakuraQ v0.10.0</title>
+    <title>SakuraQ v0.10.1</title>
 
     <style>
       :root{
@@ -3755,6 +3755,148 @@ linear-gradient(
   height: 18px;
   flex: 0 0 18px;
 }
+.authGate{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    linear-gradient(180deg, rgba(15,23,42,.20), rgba(15,23,42,.30));
+  backdrop-filter: blur(10px);
+}
+
+.authCard{
+  width: min(100%, 342px);
+  padding: 22px 20px 18px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.94);
+  box-shadow:
+    0 24px 60px rgba(15,23,42,.18),
+    inset 0 0 0 1px rgba(148,163,184,.18);
+  text-align: center;
+}
+
+.authBrand{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.authBrandLogo{
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex: 0 0 38px;
+}
+
+.authBrandText{
+  text-align: left;
+}
+
+.authBrandName{
+  font-size: 15px;
+  line-height: 1.05;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.authBrandTag{
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.2;
+  color: #64748b;
+}
+
+.authHeroIcon{
+  width: 56px;
+  height: 56px;
+  margin: 4px auto 14px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #eef4ff, #f5f3ff);
+  box-shadow: inset 0 0 0 1px rgba(99,102,241,.12);
+}
+
+.authHeroIcon svg{
+  width: 28px;
+  height: 28px;
+  fill: #4f46e5;
+}
+
+.authTitle{
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.08;
+  font-weight: 850;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+}
+
+.authSubtitle{
+  margin: 10px 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.authGoogleBtn{
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(148,163,184,.24);
+  border-radius: 14px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+  box-shadow: 0 6px 16px rgba(15,23,42,.06);
+}
+
+.authGoogleBtn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(99,102,241,.24);
+  box-shadow: 0 10px 22px rgba(15,23,42,.08);
+  background: #fcfcff;
+}
+
+.authGoogleBtn:active{
+  transform: translateY(0);
+}
+
+.authGoogleBtn:focus-visible{
+  outline: none;
+  border-color: rgba(99,102,241,.45);
+  box-shadow:
+    0 0 0 4px rgba(99,102,241,.12),
+    0 10px 22px rgba(15,23,42,.08);
+}
+
+.authGoogleIcon{
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
+.authFootnote{
+  margin: 12px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #94a3b8;
+}
 </style>
 </head>
 <body>
@@ -3882,7 +4024,7 @@ linear-gradient(
                   <div class="brandMeta">
                     <div class="brandTitleRow">
                       <h1>SakuraQ</h1>
-                      <span class="versionBadge">v0.10.0</span>
+                      <span class="versionBadge">v0.10.1</span>
                     </div>
                     <div class="sub" id="todayText">Today: ----</div>
                   </div>
@@ -4549,6 +4691,42 @@ linear-gradient(
 
 
 </body>
+
+<div id="authGate" class="authGate" aria-hidden="false">
+  <div class="authCard">
+    <div class="authBrand">
+      <img src="logo.png" alt="SakuraQ logo" class="authBrandLogo">
+      <div class="authBrandText">
+        <div class="authBrandName">SakuraQ</div>
+        <div class="authBrandTag">Focus. Track. Grow.</div>
+      </div>
+    </div>
+
+    <div class="authHeroIcon" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2l7 4v5c0 5-3.5 9.5-7 11-3.5-1.5-7-6-7-11V6l7-4z"></path>
+      </svg>
+    </div>
+
+    <h2 class="authTitle">Sign in to continue</h2>
+    <p class="authSubtitle">
+      Save your progress and keep your streak.
+    </p>
+
+    <button id="authGateLoginBtn" type="button" class="authGoogleBtn">
+      <svg class="authGoogleIcon" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.6 2.3 30.2 0 24 0 14.7 0 6.6 5.4 2.7 13.2l7.9 6.1C12.5 13.5 17.8 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.6h12.4c-.5 2.7-2.1 5-4.5 6.5l7 5.4c4.1-3.8 6.5-9.3 6.5-16z"/>
+        <path fill="#FBBC05" d="M10.6 28.3c-.6-1.8-.9-3.7-.9-5.8s.3-4 .9-5.8l-7.9-6.1C1 14.2 0 18 0 22.5s1 8.3 2.7 11.9l7.9-6.1z"/>
+        <path fill="#34A853" d="M24 45c6.5 0 12-2.1 16-5.7l-7-5.4c-2 1.4-4.5 2.2-9 2.2-6.2 0-11.5-4-13.4-9.5l-7.9 6.1C6.6 40.6 14.7 45 24 45z"/>
+      </svg>
+      <span>Continue with Google</span>
+    </button>
+
+    <p class="authFootnote">Your data is saved to your account.</p>
+  </div>
+</div>
+
 
 <script type="module" src="auth.js"></script>
 
@@ -5371,11 +5549,8 @@ window.addEventListener("sq-user-changed", async () => {
   console.log("USER SWITCH → reload user data");
 
   resetRuntimeForAccountSwitch();
-
-  // 🔥 สำคัญ: โหลดจาก cloud ก่อน
   await cloudLoadAll();
 
-  // แล้วค่อย load local (ที่เพิ่ง overwrite)
   loadState();
   loadGateCfg();
   loadGate();
@@ -5392,6 +5567,8 @@ window.addEventListener("sq-user-changed", async () => {
 
   acquireMasterTab();
   startTick();
+
+  checkAuthGate();
 });
   let diceDrag = {
   active: false,
@@ -10149,12 +10326,35 @@ loadGate();
 updateStreakAfterChange();
 updateUI();
 }
+window.checkAuthGate = function(){
+  const gate = document.getElementById("authGate");
+  if(!gate) return;
+
+  if(window.sqAuth?.uid){
+    gate.style.display = "none";
+    gate.setAttribute("aria-hidden", "true");
+  }else{
+    gate.style.display = "flex";
+    gate.setAttribute("aria-hidden", "false");
+  }
+};
+window.addEventListener("load", () => {
+  checkAuthGate();
+});
+function requireAuth(){
+  if(!window.sqAuth?.uid){
+    alert("Please login first");
+    return false;
+  }
+  return true;
+}
 
   /* =========================
     BOOT
   ========================= */
   function boot(){
 registerSW();
+checkAuthGate();
 
     loadState();
     loadGateCfg();
