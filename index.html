@@ -3357,48 +3357,65 @@ linear-gradient(
 /* ===== DAY TABS — clean pretty version ===== */
 
 .historyDayTabsWrap{
-  width: 100%;
-  max-width: 100%;
+  position: relative;
+  overflow: hidden;
+  padding-right: 26px; /* กันปุ่มขวาสุดโดนบัง */
+}
+
+.historyDayTabs{
+  display: flex;
+  gap: 10px;
   overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
+  padding: 6px 0 10px;
+  scroll-behavior: smooth;
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.historyDayTabsWrap::-webkit-scrollbar{
+.historyDayTabs::-webkit-scrollbar{
   display: none;
 }
 
-.historyDayTabs,
-#histDayTabs{
-  display: inline-flex !important;
-  flex-wrap: nowrap !important;
-  gap: 8px;
-  width: max-content !important;
-  min-width: 100%;
-  white-space: nowrap;
-  padding: 4px 0 8px;
-  margin-bottom: 12px;
-  box-sizing: border-box;
+/* แค่ทำขอบขวาให้ดูมีของต่อ ไม่ใช้ลูกศรลอย */
+.historyDayTabsWrap::after{
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(246,249,255,0), rgba(246,249,255,.96) 75%);
+  pointer-events: none;
 }
 
-.historyDayTabs::-webkit-scrollbar,
-#histDayTabs::-webkit-scrollbar{
-  display: none;
-}
-
-.historyDayTab,
-#histDayTabs .historyDayTab{
-  flex: 0 0 auto !important;
-  width: auto !important;
+/* ปุ่มวัน */
+.historyDayTab{
+  flex: 0 0 auto;
   min-width: max-content;
-  white-space: nowrap;
+  padding: 10px 14px;
   border-radius: 999px;
-  padding: 8px 14px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: #e5e7eb;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: none;
+  transition: all .15s ease;
 }
 
+.historyDayTab:hover{
+  background: #dbeafe;
+  color: #1e3a8a;
+  border-color: rgba(59,130,246,.25);
+}
+
+/* อันที่เลือกอยู่ */
 .historyDayTab.active{
-  scroll-margin-left: 12px;
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 8px 18px rgba(15,23,42,.18);
 }
 
 /* กัน parent ดัน layout */
@@ -3905,7 +3922,53 @@ linear-gradient(
   line-height: 1.4;
   color: #94a3b8;
 }
+.historyDayTabsWrap{
+  position:relative;
+}
 
+.historyDayTabs{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding:6px 2px 10px;
+
+  scrollbar-width:none;
+}
+
+.historyDayTabs::-webkit-scrollbar{
+  display:none;
+}
+
+
+.rangeTab{
+  flex:0 0 auto;
+
+  padding:8px 14px;
+  border-radius:999px;
+
+  background:#dcfce7;
+  color:#166534;
+
+  font-weight:800;
+  font-size:13px;
+
+  border:1px solid rgba(34,197,94,.2);
+  transition:all .15s ease;
+}
+
+/* hover */
+.rangeTab:hover{
+  background:#bbf7d0;
+}
+
+/* ตัวที่เลือก */
+.rangeTab.active{
+  background:#166534;
+  color:#fff;
+  border-color:#166534;
+
+  box-shadow:0 6px 16px rgba(22,101,52,.25);
+}
 </style>
 </head>
 <body>
@@ -4238,17 +4301,16 @@ linear-gradient(
                 <div class="hint" id="capHint"></div>
               </div>
 
-              <div>
-                <label for="qualityBonus">Quality Bonus</label>
-                <select id="qualityBonus">
-                  <option value="0">0</option>
-                  <option value="2">+2</option>
-                  <option value="4">+4</option>
-                  <option value="6">+6</option>
-                </select>
-                <div class="hint">เลือกตามคุณภาพจริง (ไม่เกิน +6)</div>
-              </div>
-            </div>
+              <div id="qualityBonusWrap" hidden aria-hidden="true">
+  <label for="qualityBonus">Quality Bonus</label>
+  <select id="qualityBonus" tabindex="-1">
+    <option value="0">0</option>
+    <option value="2">+2</option>
+    <option value="4">+4</option>
+    <option value="6">+6</option>
+  </select>
+</div>
+</div>
 
             <div style="margin-top:10px;">
               <label for="notes">Notes</label>
@@ -4770,13 +4832,6 @@ window.sqDB = db;
 window.sqCloud = { doc, setDoc, getDoc };
 </script>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.sqDB = db;
-window.sqCloud = { doc, setDoc, getDoc };
-</script>
-
   <script>
 /* =========================================================
   QPS Timer v0.6.x — Full JS (Safe/Null-Guard) + Gate Page v2
@@ -4834,7 +4889,7 @@ let tabHeartbeat = null;
   ========================= */
   const RULES = {
     basePerMinute: 0.4,
-    bonusMinMinutes: 30,
+    bonusMinMinutes: 25,
     baseCapPerQuestNamePerDay: 60,
   };
 
@@ -5080,6 +5135,14 @@ function hasQuestAfterTodayTrigger(){
   if(!today || !Array.isArray(today.quests)) return false;
 
   return today.quests.some(q => Number(q.ts || 0) >= triggerTs);
+}
+function calcInsightBonusV1({ minutes, note }){
+  const text = (note || "").trim();
+
+  if(minutes < 25) return 0;
+  if(text.length < 20) return 0;
+
+  return 2;
 }
 
 
@@ -6640,16 +6703,19 @@ function showActionLockBar(msg){
     if(el.submitWarn){ el.submitWarn.style.display="none"; el.submitWarn.textContent=""; }
   }
   function applyBonusRule(minutes){
-    if(!el.qualityBonus || !el.bonusRuleHint) return;
-    if(minutes < RULES.bonusMinMinutes){
-      el.qualityBonus.value = "0";
-      el.qualityBonus.disabled = true;
-      el.bonusRuleHint.textContent = `Bonus lock (ต้อง ≥ ${RULES.bonusMinMinutes} นาที)`;
-    }else{
-      el.qualityBonus.disabled = false;
-      el.bonusRuleHint.textContent = `Bonus ใช้ได้ (เวลา ≥ ${RULES.bonusMinMinutes} นาที)`;
-    }
+  if(!el.bonusRuleHint) return;
+
+  if(minutes < RULES.bonusMinMinutes){
+    el.bonusRuleHint.textContent = `โบนัสใช้ได้เมื่อครบอย่างน้อย ${RULES.bonusMinMinutes} นาที`;
+  }else{
+    el.bonusRuleHint.textContent = `โบนัสจะถูกคำนวณอัตโนมัติ`;
   }
+
+  if(el.qualityBonus){
+    el.qualityBonus.value = "0";
+    el.qualityBonus.disabled = true;
+  }
+}
   function updateCapHint(dateKey, questName){
     if(!el.capHint) return;
     const used = calcQuestBaseMinutesUsed(dateKey, questName);
@@ -8054,7 +8120,10 @@ if(minutes < RULES.bonusMinMinutes && el.qualityBonus){
   el.qualityBonus.value = "0";
 }
 
-const bonus = Number(el.qualityBonus?.value || 0);
+const bonus = calcInsightBonusV1({
+  minutes,
+  note: el.notes?.value
+});
 const questScore = baseScore + bonus;
 
     pushUndoSnapshot();
@@ -8410,7 +8479,7 @@ on($("dataPanel"), "click", (e)=>{
     timer: { title: "Timer", body: "เลือกหมวด + ตั้ง Quest Name แล้วกด Start\nPause/Resume ได้\nStop แล้วค่อย Report" },
     name:  { title: "Quest Name (ห้ามซ้ำ)", body: "ชื่อต้องไม่ซ้ำในวันเดียว\nCap base จะนับตามชื่อเควสนี้ (60 นาที/วัน/ชื่อ)" },
     today: { title: "Today", body: "ดูคะแนนรวมวันนี้ + รายการเควส\nExport/Import ใช้สำรองข้อมูล \nUndo/Redo ใช้แก้ล่าสุดได้ "},
-    report:{ title: "Report", body: "Report จะโผล่เมื่อกด Stop\nMinutes > 0\nBonus ใช้ได้เมื่อเวลา ≥ 30 นาที" },
+    report:{ title: "Report", body: "Report จะโผล่เมื่อกด Stop\nMinutes > 0\nBonus ใช้ได้เมื่อเวลา ≥ 25 นาที" },
     cut:   { title: "Cutting Time", body: "กด Set Time เพื่อเปิด\nใส่นาที 1–360\nHard: ถึงแล้วหยุดทันที\nSoft: เตือนก่อน 10 วิ แล้วหยุด" },
     gate:  { title: "Morning Gate", body:
   `ตั้งค่าในหน้า Gate (กดปุ่ม Morning Gate ขวาบน)
